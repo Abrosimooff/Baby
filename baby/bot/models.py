@@ -15,7 +15,7 @@ class WaitUserVK(models.Model):
 
 class TalkLineVK(models.Model):
     """ Линия разговора """
-    name = models.CharField(verbose_name=u'Название линии разговора')
+    name = models.CharField(verbose_name=u'Название линии разговора', max_length=100)
     user_vk = models.ForeignKey(UserVK, on_delete=CASCADE)
     path = models.CharField(max_length=100, verbose_name=u'Путь к вопросу')
     answer = models.TextField(verbose_name=u'Ответ')
