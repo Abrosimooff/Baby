@@ -81,23 +81,20 @@ class Command(BaseCommand):
                           'message_id', 'peer_id', 'raw', 'timestamp', 'to_me', 'type', 'user_id', 'text']
                     for key in ss:
                         print(key, getattr(event, key) if hasattr(event, key) else u'NOT ATTR')
-                    print('**********************')
 
-                    print('text:', event.text)
                     if 'photo' in event.attachments.values():
                         message_detail = self.vk.messages.getById(message_ids=event.message_id)
-                        print('photo:', self.get_photo(message_detail['items'][0]['attachments']))
+                        print('photo', self.get_photo(message_detail['items'][0]['attachments']))
+
+                    print('**********************')
 
                     if hasattr(event, 'payload'):
                         # payload = json.loads(event.payload)
-                        try:
-                            BaseLine().process_payload(event)
-                        except Exception as error:
-                            print(error)
+                        BaseLine().process_payload(event)
 
                     self.vk.messages.send(  # Отправляем сообщение
                         user_id=event.user_id,
-                        message='Прям в ЛС ? Продолжай..',
+                        message='Сколько ты хочешь детей?',
                         random_id=random.randint(0, 10000000),
                         keyboard=json.dumps(dict(
                             one_time=True,
@@ -105,14 +102,14 @@ class Command(BaseCommand):
                                 dict(
                                     action=dict(
                                         type="text",
-                                        label="Девочка",
+                                        label=random.randrange(0, 100),
                                         payload=dict(action='/answer_question/1/')),
                                     color="positive"
                                 ),
                                 dict(
                                     action=dict(
                                         type="text",
-                                        label="Мальчик",
+                                        label=random.randrange(0, 100),
                                         payload=dict(action='/answer_question/1/')),
                                     color="negative"
                                 )
