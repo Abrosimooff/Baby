@@ -8,7 +8,7 @@ from vk_api.longpoll import VkLongPoll, VkEventType
 import requests
 
 # VK_KEY = 'c22da69da2f2e751ae2246c4cd28b1b3641af15ed016535cb2518053a5e373bc01634afd5284410c97023'
-from bot.views import BaseLine
+from bot.views import BaseLine, BotRequest
 
 VK_KEY = '2a41e2391b546114ebaf498df8b9fbf46d2fc8aae209200d038f80ca133f19f214b701d55befe7dbd9e6d'
 VK_KEY_SERVICE = '1c5717281c5717281c5717288c1c3bd13a11c571c5717284122fb585071b42f664be884'
@@ -87,39 +87,6 @@ class Command(BaseCommand):
                         print('photo', self.get_photo(message_detail['items'][0]['attachments']))
 
                     print('**********************')
-
-                    if hasattr(event, 'payload'):
-                        # payload = json.loads(event.payload)
-                        BaseLine().process_payload(event)
-
-                    self.vk.messages.send(  # Отправляем сообщение
-                        user_id=event.user_id,
-                        message='Сколько ты хочешь детей?',
-                        random_id=random.randint(0, 10000000),
-                        keyboard=json.dumps(dict(
-                            one_time=True,
-                            buttons=[[
-                                dict(
-                                    action=dict(
-                                        type="text",
-                                        label=random.randrange(0, 100),
-                                        payload=dict(action='/answer_question/1/')),
-                                    color="positive"
-                                ),
-                                dict(
-                                    action=dict(
-                                        type="text",
-                                        label=random.randrange(0, 100),
-                                        payload=dict(action='/answer_question/1/')),
-                                    color="negative"
-                                )
-                            ]]
-                        ))
-                    )
-
-                # if event.from_chat:  # Если написали в Беседе
-                #     vk.messages.send(  # Отправляем собщение
-                #         chat_id=event.chat_id,
-                #         message='Супер! Продолжай',
-                #         random_id=random.randint(0, 10000000)
-                #     )
+                    message_detail = self.vk.messages.getById(message_ids=event.message_id)
+                    bot_request = BotRequest(message=message_detail, event=event, vk_api=self.vk)
+                    BaseLine().process_payload(bot_request)
