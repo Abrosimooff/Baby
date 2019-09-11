@@ -27,8 +27,8 @@ class JSONFormField(forms.CharField):
             return json.dumps(value)
         return super(JSONFormField, self).to_python(value)
 
-class JSONField(models.TextField):
 
+class JSONField(models.TextField):
     description = "JsonField"
 
     # def contribute_to_class(self, cls, name, virtual_only=False):
@@ -47,7 +47,6 @@ class JSONField(models.TextField):
         return value
 
     def get_prep_value(self, value):
-        print('get_prep_value', value)
         if value == "" or value is None:
             return None
         return json.dumps(value, cls=DjangoJSONEncoder)
@@ -56,40 +55,3 @@ class JSONField(models.TextField):
         defaults = {'form_class': JSONFormField}
         defaults.update(kwargs)
         return super(JSONField, self).formfield(**defaults)
-
-########################
-
-
-#
-# class JSONFieldBase(object):
-#
-#     description = "JsonField"
-#     from django.db.models.fields import Creator
-#     def contribute_to_class(self, cls, name, virtual_only=False):
-#         setattr(cls, name, Creator(self))
-#         super(JSONFieldBase, self).contribute_to_class(cls, name, virtual_only=virtual_only)
-#
-#     def to_python(self, value):
-#         if value == "":
-#             return None
-#
-#         try:
-#             if isinstance(value, str):
-#                 return json.loads(value)
-#         except ValueError:
-#             pass
-#         return value
-#
-#     def get_prep_value(self, value):
-#         if value == "" or value is None:
-#             return None
-#         return json.dumps(value, cls=DjangoJSONEncoder)
-#
-#     def formfield(self, **kwargs):
-#         defaults = {'form_class': JSONFormField}
-#         defaults.update(kwargs)
-#         return super(JSONFieldBase, self).formfield(**defaults)
-#
-#
-# class JSONField(JSONFieldBase, models.TextField):
-#     """JSONField is a generic textfield that serializes/unserializes JSON objects"""

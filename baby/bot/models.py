@@ -18,31 +18,16 @@ class UserVK(models.Model):
         return {}
 
 
-# class WaitUserVK(models.Model):
-#     """ Ожидает ли сейчас программа ответа от юзера и на какой вопрос """
-#     user_vk = models.OneToOneField(UserVK, on_delete=CASCADE)
-#     payload = JSONField(max_length=100, verbose_name=u'Путь к вопросу')
+class Baby(models.Model):
+    """ Младенец """
+    GENDER_CHOICES = {
+        1: u'Девочка',
+        2: u'Мальчик'
+    }
+    first_name = models.CharField(max_length=100, verbose_name=u'Имя младенца')
+    birth_date = models.DateField(verbose_name=u'Дата рождения', null=True, blank=True)
+    gender = models.PositiveSmallIntegerField(choices=GENDER_CHOICES.items(), verbose_name=u'Пол')
 
-
-# class TalkLineVK(models.Model):
-#     """ Линия разговора """
-#     name = models.CharField(verbose_name=u'Название линии разговора', max_length=100)
-#     user_vk = models.ForeignKey(UserVK, on_delete=CASCADE)
-#     path = models.CharField(max_length=100, verbose_name=u'Путь к вопросу')
-#     answer = models.TextField(verbose_name=u'Ответ')
-
-#
-# class Baby(models.Model):
-#     """ Младенец """
-#     GENDER_CHOICES = {
-#         1: u'Девочка',
-#         2: u'Мальчик'
-#     }
-#     first_name = models.CharField(max_length=100, verbose_name=u'Имя младенца')
-#     birth_date = models.DateField(verbose_name=u'Дата рождения', null=True, blank=True)
-#     gender = models.PositiveSmallIntegerField(choices=GENDER_CHOICES.items(), verbose_name=u'Пол')
-#
-#
 # class BabyUserVK(models.Model):
 #     """ Привязка младенца к юзеру ВК. т.е кто может заполнять инфу о ребёнке """
 #     user_vk = models.ForeignKey(UserVK, on_delete=CASCADE)
@@ -64,3 +49,11 @@ class UserVK(models.Model):
 #     history = models.ForeignKey(BabyHistory, on_delete=CASCADE)
 #     attachment_type = models.CharField(max_length=50)
 #     link = models.URLField(verbose_name=u'Путь')
+
+
+# class TalkLineVK(models.Model):
+#     """ Линия разговора """
+#     name = models.CharField(verbose_name=u'Название линии разговора', max_length=100)
+#     user_vk = models.ForeignKey(UserVK, on_delete=CASCADE)
+#     path = models.CharField(max_length=100, verbose_name=u'Путь к вопросу')
+#     answer = models.TextField(verbose_name=u'Ответ')

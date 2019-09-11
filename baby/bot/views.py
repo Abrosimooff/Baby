@@ -11,6 +11,7 @@ from django.utils.decorators import classonlymethod
 from django.views import View
 
 from bot.models import UserVK
+from bot.validators import ValidateGenderList
 
 
 class BotRequest(object):
@@ -165,7 +166,7 @@ class StartLine(BaseLine):
     ]
 
     question_list = [
-        {'message': u'Кто у Вас? Мальчик? Девочка?', 'field_name': 'gender',
+        {'message': u'Кто у Вас? Мальчик? Девочка?', 'field_name': 'gender', 'validator': ValidateGenderList,
          'keyboard': dict(
             one_time=True,
             buttons=[[
@@ -186,7 +187,7 @@ class StartLine(BaseLine):
             ]]
             )
         },
-        {'message': u'Ок. Как зовут вашу/вашего *** ?', 'field_name': 'first_name'},
+        {'message': u'Как зовут вашего малыша?', 'field_name': 'first_name'},
         {'message': u'Выберите год рождения:', 'field_name': 'year',
          'keyboard': dict(
              one_time=True,
@@ -214,8 +215,27 @@ class StartLine(BaseLine):
              ]
          ),
          },
-        {'message': u'Напишите какого числа родилась ваше ***:', 'field_name': 'day'},
+        {'message': u'Напишите какого числа родился малыш :)', 'field_name': 'day'},
     ]
+
+    def error_response(self, question_pk, error_message=u'Ошибка!'):
+        current_question = self.question_list[question_pk]
+        user_payload = self.user_vk.wait_payload_dict
+        user_payload['action'] = '/start/{}/'.format(question_pk)
+        self.user_vk.wait_payload = user_payload
+        self.user_vk.save()
+        self.request.vk_api.messages.send(
+            user_id=self.user_vk.user_vk_id,
+            message=u'{}\n{}'.format(error_message, current_question['message']),
+            random_id=random.randint(0, 10000000),
+            keyboard=json.dumps(current_question.get('keyboard', {}))
+        )
+
+    def get_validator(self, question_pk, payload):
+        if 'validator' in self.question_list[question_pk]:
+            validator_class = self.question_list[question_pk]['validator']
+            field_name = self.question_list[question_pk]['field_name']
+            return validator_class(value=payload['cleaned_data'][field_name])
 
     def bot_handler(self, request, *args, **kwargs):
 
@@ -261,6 +281,11 @@ class StartLine(BaseLine):
                     user_payload['cleaned_data'][current_question['field_name']] = self.request.event.text
 
                 print('user_payload', user_payload)
+
+                # Валидируем ответ, если валидатор указан
+                validator = self.get_validator(question_pk=question_pk, payload=user_payload)
+                if validator and not validator.is_valid():
+                    return self.error_response(question_pk=question_pk, error_message=validator.error_message)
 
                 # Если это был послдений вопрос
                 if question_pk + 1 == len(self.question_list):
