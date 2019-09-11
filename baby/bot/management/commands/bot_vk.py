@@ -77,16 +77,16 @@ class Command(BaseCommand):
             # print(event.type)
             if event.type == VkEventType.MESSAGE_NEW and event.to_me:
                 if event.from_user:  # Если написали в ЛС
-                    ss = ['attachments', 'from_chat', 'from_group', 'from_me', 'from_user',
-                          'message_id', 'peer_id', 'raw', 'timestamp', 'to_me', 'type', 'user_id', 'text']
-                    for key in ss:
-                        print(key, getattr(event, key) if hasattr(event, key) else u'NOT ATTR')
-
-                    if 'photo' in event.attachments.values():
-                        message_detail = self.vk.messages.getById(message_ids=event.message_id)
-                        print('photo', self.get_photo(message_detail['items'][0]['attachments']))
-
-                    print('**********************')
+                    # ss = ['attachments', 'from_chat', 'from_group', 'from_me', 'from_user',
+                    #       'message_id', 'peer_id', 'raw', 'timestamp', 'to_me', 'type', 'user_id', 'text']
+                    # for key in ss:
+                    #     print(key, getattr(event, key) if hasattr(event, key) else u'NOT ATTR')
+                    #
+                    # if 'photo' in event.attachments.values():
+                    #     message_detail = self.vk.messages.getById(message_ids=event.message_id)
+                    #     print('photo', self.get_photo(message_detail['items'][0]['attachments']))
+                    #
+                    # print('**********************')
                     message_detail = self.vk.messages.getById(message_ids=event.message_id)
                     bot_request = BotRequest(message=message_detail, event=event, vk_api=self.vk)
                     BaseLine().process_payload(bot_request)
