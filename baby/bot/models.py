@@ -14,8 +14,8 @@ class UserVK(models.Model):
     def wait_payload_dict(self):
         """ Преобразовать в дикт """
         if self.wait_payload is not None:
-            # print('type2', json.loads(json.loads(self.wait_payload)))
             return json.loads(self.wait_payload)
+        return {}
 
 
 # class WaitUserVK(models.Model):

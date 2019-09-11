@@ -1,3 +1,4 @@
+import datetime
 import json
 import random
 from functools import update_wrapper
@@ -73,18 +74,21 @@ class BaseLine(View):
     def bot_handler(self, request, *args, **kwargs):
         pass
 
-    # def process_start(self, bot_request):
-    #     match = resolve('/start/None/', urlconf='bot.urls')
-    #     return StartLine().as_view(bot_request, question_pk=None)
-
     def get_action(self, bot_request):
+
+        # Если первый раз - стартуем
         if not self.user_vk:
             return '/start/None/'
-        if self.user_vk.wait_payload_dict:
-            return self.user_vk.wait_payload_dict['action']
-        elif hasattr(bot_request.event, 'payload'):
+
+        # Если нажали на кнопку
+        if hasattr(bot_request.event, 'payload'):
             payload = json.loads(bot_request.event.payload)
             return payload['action']
+
+        # Если от пользователя ожидается action
+        elif self.user_vk.wait_payload_dict:
+            if self.user_vk.wait_payload_dict.get('action'):
+                return self.user_vk.wait_payload_dict['action']
 
     def process_payload(self, bot_request):
         response = None
@@ -154,19 +158,68 @@ class AnswerQuestionLine(BaseLine):
 
 class StartLine(BaseLine):
     """ Стартовая линия """
+    month_list = [
+        [(1, "Январь"), (2, "Февраль"), (3, "Март"),  (4, "Апрель")],
+        [(5, "Май"), (6, "Июнь"), (7, "Июль"),  (8, "Август")],
+        [(9, "Сентябрь"), (10, "Октябрь"), (11, "Ноябрь"),  (12, "Декабрь")]
+    ]
 
     question_list = [
-        u'Кто у Вас? Мальчик? Девочка?',
-        u'Ок. Как зовут вашу/вашего *** ?',
-        u'Выберите год рождения:',
-        u'Выберите месяц рождения:',
-        u'Выберите день рождения:',
+        {'message': u'Кто у Вас? Мальчик? Девочка?', 'field_name': 'gender',
+         'keyboard': dict(
+            one_time=True,
+            buttons=[[
+                dict(
+                    action=dict(
+                        type="text",
+                        label=u'Девочка',
+                        payload=dict(action='/start/0/', answer=1)),
+                    color="positive"
+                ),
+                dict(
+                    action=dict(
+                        type="text",
+                        label=u'Мальчик',
+                        payload=dict(action='/start/0/', answer=2)),
+                    color="positive"
+                )
+            ]]
+            )
+        },
+        {'message': u'Ок. Как зовут вашу/вашего *** ?', 'field_name': 'first_name'},
+        {'message': u'Выберите год рождения:', 'field_name': 'year',
+         'keyboard': dict(
+             one_time=True,
+             buttons=[[
+                 dict(
+                     action=dict(
+                         type="text",
+                         label=year,
+                         payload=dict(action='/start/2/', answer=year)),
+                     color="positive"
+                 ) for year in reversed(range(datetime.date.today().year-3, datetime.date.today().year+1))
+             ]]
+         )},
+        {'message': u'Выберите месяц рождения:', 'field_name': 'month',
+         'keyboard': dict(
+             one_time=True,
+             buttons=[[
+                 dict(
+                     action=dict(
+                         type="text",
+                         label=month[1],
+                         payload=dict(action='/start/3/', answer=month[0])),
+                     color="positive"
+                 )for month in month_part] for month_part in month_list
+             ]
+         ),
+         },
+        {'message': u'Напишите какого числа родилась ваше ***:', 'field_name': 'day'},
     ]
 
     def bot_handler(self, request, *args, **kwargs):
 
         if not self.user_vk:
-
             # Отправляем первое сообщение
             self.user_vk = UserVK.objects.create(user_vk_id=request.event.user_id)
             request.vk_api.messages.send(
@@ -182,17 +235,32 @@ class StartLine(BaseLine):
             self.user_vk.save()
 
             # Отправляем первое сообщение из линии настроек
+            question = self.question_list[0]
             request.vk_api.messages.send(
                 user_id=self.user_vk.user_vk_id,
-                message=self.question_list[0],
-                random_id=random.randint(0, 10000000)
+                message=question['message'],
+                random_id=random.randint(0, 10000000),
+                keyboard=json.dumps(question.get('keyboard', {}))
             )
         else:
+            user_payload = self.user_vk.wait_payload_dict
             question_pk = int(kwargs.get('question_pk'))
+            current_question = self.question_list[question_pk]
+            if 'cleaned_data' not in user_payload:
+                user_payload['cleaned_data'] = {}
+
             if question_pk < len(self.question_list):
                 # разбираем ответ на вопрос
-                print(self.question_list[question_pk])
+                print(current_question['message'])
                 print(self.request.event.text)
+                # сохраняем ответ на вопрос в user_paylaod
+                if hasattr(self.request.event, 'payload'):
+                    payload_dict = json.loads(self.request.event.payload)
+                    user_payload['cleaned_data'][current_question['field_name']] = payload_dict['answer']
+                else:
+                    user_payload['cleaned_data'][current_question['field_name']] = self.request.event.text
+
+                print('user_payload', user_payload)
 
                 # Если это был послдений вопрос
                 if question_pk + 1 == len(self.question_list):
@@ -208,14 +276,16 @@ class StartLine(BaseLine):
                 else:
                     # задаём след вопрос
                     # ожидаем след сообщение от пользователя как ответ на /start/question_pk + 1/
-                    payload = dict(action='/start/{}/'.format(question_pk + 1))
-                    self.user_vk.wait_payload = payload
+                    next_question = self.question_list[question_pk + 1]
+                    user_payload['action'] = '/start/{}/'.format(question_pk + 1)
+                    self.user_vk.wait_payload = user_payload
                     self.user_vk.save()
 
-                    # Отправляем первое сообщение из линии настроек
+                    # Отправляем след сообщение из линии настроек
                     request.vk_api.messages.send(
                         user_id=self.user_vk.user_vk_id,
-                        message=u'Ок. %s' % self.question_list[question_pk + 1],
-                        random_id=random.randint(0, 10000000)
+                        message=u'Ок. %s' % next_question['message'],
+                        random_id=random.randint(0, 10000000),
+                        keyboard=json.dumps(next_question.get('keyboard', {}))
                     )
         super().bot_handler(request, *args, **kwargs)
