@@ -45,20 +45,20 @@ class BabyUserVK(models.Model):
     last_message_date = models.DateTimeField(verbose_name=u'Время последнего сообщения от юзера', null=True, blank=True)
 
 
-# class BabyHistory(models.Model):
-#     """ История-Хроника ребёнка """
-#     baby = models.ForeignKey(Baby, on_delete=CASCADE, verbose_name=u'Младенец')
-#     user_vk = models.ForeignKey(UserVK, on_delete=CASCADE, verbose_name=u'Автор заметки')
-#     text = models.TextField(verbose_name=u'Текст заметки')
-#     message_vk_id = models.IntegerField(verbose_name=u'ID сообщения ВК')
-#     date = models.DateTimeField(verbose_name=u'Дата время заметки')
-#
-#
-# class BabyHistoryAttachment(models.Model):
-#     """ Вложения к хронике """
-#     history = models.ForeignKey(BabyHistory, on_delete=CASCADE)
-#     attachment_type = models.CharField(max_length=50)
-#     link = models.URLField(verbose_name=u'Путь')
+class BabyHistory(models.Model):
+    """ История-Хроника ребёнка """
+    baby = models.ForeignKey(Baby, on_delete=CASCADE, verbose_name=u'Младенец')
+    user_vk = models.ForeignKey(UserVK, on_delete=CASCADE, verbose_name=u'Автор заметки')
+    text = models.TextField(verbose_name=u'Текст заметки')
+    message_vk_id = models.IntegerField(verbose_name=u'ID сообщения ВК')
+    date = models.DateTimeField(verbose_name=u'Дата время заметки')
+
+
+class BabyHistoryAttachment(models.Model):
+    """ Вложения к хронике """
+    history = models.ForeignKey(BabyHistory, on_delete=CASCADE)
+    attachment_type = models.CharField(max_length=50)
+    link = models.URLField(verbose_name=u'Путь')
 
 
 # class TalkLineVK(models.Model):

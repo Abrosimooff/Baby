@@ -32,8 +32,9 @@ class BotRequest(object):
     event = None
     vk_api = None
 
-    def __init__(self, message=None, event=None, vk_api=None):
+    def __init__(self, message=None, photo_list=None, event=None, vk_api=None):
         self.message = message
+        self.photo_list = photo_list or []
         self.event = event
         self.vk_api = vk_api
 
@@ -125,7 +126,8 @@ class BaseLine(View):
             bot_request.vk_api.messages.send(
                 user_id=self.user_vk.user_vk_id,
                 message=u'Информацию принял! Спасибо)',
-                random_id=random.randint(0, 10000000)
+                random_id=random.randint(0, 10000000),
+                keyboard=json.dumps(DEFAULT_KEYBOARD)
             )
 
 
@@ -299,7 +301,8 @@ class StartLine(BaseLine):
             self.request.vk_api.messages.send(
                 user_id=self.user_vk.user_vk_id,
                 message=u'Спасибо. Теперь мы познакомились. Далее немного расскажу о себе :)',
-                random_id=random.randint(0, 10000000)
+                random_id=random.randint(0, 10000000),
+                keyboard=json.dumps(DEFAULT_KEYBOARD)
             )
         else:
             # задаём след вопрос
@@ -326,7 +329,7 @@ class StartLine(BaseLine):
         # Если у юзера уже есть ребёнок, то обновляем инфу,
         # А если нет ребёнка, то создаём и привязываем
         if self.user_vk.baby:
-            self.user_vk.baby.update(**params)
+            Baby.objects.filter(pk=self.user_vk.baby.pk).update(**params)
         else:
             baby = Baby.objects.create(**params)
             b2u = BabyUserVK.objects.create(user_vk=self.user_vk, baby=baby, last_message_date=datetime.datetime.now())
