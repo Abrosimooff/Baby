@@ -2,6 +2,8 @@ import json
 
 from django.db import models
 from django.db.models import CASCADE
+from django.utils.functional import cached_property
+
 from bot.models_utils.jsonfield import JSONField
 
 
@@ -14,8 +16,15 @@ class UserVK(models.Model):
     def wait_payload_dict(self):
         """ Преобразовать в дикт """
         if self.wait_payload is not None:
+            if isinstance(self.wait_payload, dict):
+                return self.wait_payload
             return json.loads(self.wait_payload)
         return {}
+
+    @property
+    def baby(self):
+        """ Ребёнок пользователя, если есть """
+        return Baby.objects.filter(babyuservk__user_vk=self).first()
 
 
 class Baby(models.Model):
@@ -28,13 +37,14 @@ class Baby(models.Model):
     birth_date = models.DateField(verbose_name=u'Дата рождения', null=True, blank=True)
     gender = models.PositiveSmallIntegerField(choices=GENDER_CHOICES.items(), verbose_name=u'Пол')
 
-# class BabyUserVK(models.Model):
-#     """ Привязка младенца к юзеру ВК. т.е кто может заполнять инфу о ребёнке """
-#     user_vk = models.ForeignKey(UserVK, on_delete=CASCADE)
-#     baby = models.ForeignKey(Baby, on_delete=CASCADE)
-#     last_message_date = models.DateTimeField(verbose_name=u'Время последнего сообщения от юзера', null=True, blank=True)
-#
-#
+
+class BabyUserVK(models.Model):
+    """ Привязка младенца к юзеру ВК. т.е кто может заполнять инфу о ребёнке """
+    user_vk = models.ForeignKey(UserVK, on_delete=CASCADE)
+    baby = models.ForeignKey(Baby, on_delete=CASCADE)
+    last_message_date = models.DateTimeField(verbose_name=u'Время последнего сообщения от юзера', null=True, blank=True)
+
+
 # class BabyHistory(models.Model):
 #     """ История-Хроника ребёнка """
 #     baby = models.ForeignKey(Baby, on_delete=CASCADE, verbose_name=u'Младенец')
