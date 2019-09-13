@@ -1,141 +1,11 @@
 import datetime
 import json
 import random
-from functools import update_wrapper
-
-from django.shortcuts import render
-
-# Create your views here.
 from django.urls import resolve
-from django.utils.decorators import classonlymethod
-from django.views import View
 
-from bot.models import UserVK, Baby, BabyUserVK
+from bot.base import BaseLine, DEFAULT_KEYBOARD
+from bot.models import UserVK, Baby, BabyUserVK, BabyHistory, BabyHistoryAttachment, AttachType
 from bot.validators import ValidateGenderList, FirstNameValidate, ValidateYearList, ValidateMonthList, ValidateBirthDate
-
-DEFAULT_KEYBOARD = dict(
-    one_time=True,
-    buttons=[[
-        dict(
-            action=dict(
-                type="text",
-                label=u'Настройки',
-                payload=dict(action='/settings/-1/')
-            ),
-            color="positive"
-        )
-     ]]
-     )
-
-class BotRequest(object):
-    message = None
-    event = None
-    vk_api = None
-
-    def __init__(self, message=None, photo_list=None, event=None, vk_api=None):
-        self.message = message
-        self.photo_list = photo_list or []
-        self.event = event
-        self.vk_api = vk_api
-
-
-class BaseLine(View):
-    """ Базовый класс для обработчиков """
-    user_vk = None
-
-    @classonlymethod
-    def as_view(cls, **initkwargs):
-        """Main entry point for a request-response process."""
-        for key in initkwargs:
-            if key in cls.http_method_names:
-                raise TypeError("You tried to pass in the %s method name as a "
-                                "keyword argument to %s(). Don't do that."
-                                % (key, cls.__name__))
-            if not hasattr(cls, key):
-                raise TypeError("%s() received an invalid keyword %r. as_view "
-                                "only accepts arguments that are already "
-                                "attributes of the class." % (cls.__name__, key))
-
-        def view(request, *args, **kwargs):
-            self = cls(**initkwargs)
-            if hasattr(self, 'get') and not hasattr(self, 'head'):
-                self.head = self.get
-            self.setup(request, *args, **kwargs)
-            if not hasattr(self, 'request'):
-                raise AttributeError(
-                    "%s instance has no 'request' attribute. Did you override "
-                    "setup() and forget to call super()?" % cls.__name__
-                )
-            return self.dispatch(request, *args, **kwargs)
-
-        view.view_class = cls
-        view.view_initkwargs = initkwargs
-
-        # take name and docstring from class
-        update_wrapper(view, cls, updated=())
-
-        # and possible attributes set by decorators
-        # like csrf_exempt from dispatch
-        update_wrapper(view, cls.dispatch, assigned=())
-        return view
-
-    def dispatch(self, request, *args, **kwargs):
-        try:
-            self.user_vk = UserVK.objects.get(user_vk_id=request.event.user_id)
-        except UserVK.DoesNotExist:
-            self.user_vk = None
-        return self.bot_handler(request, *args, **kwargs)
-
-    def bot_handler(self, request, *args, **kwargs):
-        pass
-
-    def get_action(self, bot_request):
-
-        # Если первый раз - стартуем
-        if not self.user_vk:
-            return '/welcome'
-
-        # Если нажали на кнопку
-        if hasattr(bot_request.event, 'payload'):
-            payload = json.loads(bot_request.event.payload)
-            return payload['action']
-
-        # Если от пользователя ожидается action
-        elif self.user_vk.wait_payload_dict:
-            if self.user_vk.wait_payload_dict.get('action'):
-                return self.user_vk.wait_payload_dict['action']
-
-    def process_payload(self, bot_request):
-        try:
-            self.user_vk = UserVK.objects.get(user_vk_id=bot_request.event.user_id)
-        except UserVK.DoesNotExist:
-            self.user_vk = None
-
-        action = self.get_action(bot_request)
-
-        print('action', action)
-        if action:
-            match = resolve(action, urlconf='bot.urls')
-            if match:
-                func = match.func
-                args = match.args
-                kwargs = match.kwargs
-                func(bot_request, *args, **kwargs)
-        else:
-            # Когда ничего не ожидаем от пользователя - отвечаем так))
-            bot_request.vk_api.messages.send(
-                user_id=self.user_vk.user_vk_id,
-                message=u'Информацию принял! Спасибо)',
-                random_id=random.randint(0, 10000000),
-                keyboard=json.dumps(DEFAULT_KEYBOARD)
-            )
-
-
-class AnswerQuestionLine(BaseLine):
-    """ Ответ на вопрос """
-    def bot_handler(self, request, *args, **kwargs):
-        print('AnswerQuestionLine', request, args, kwargs)
-        super().bot_handler(request, *args, **kwargs)
 
 
 class Welcome(BaseLine):
@@ -155,6 +25,87 @@ class Welcome(BaseLine):
             # Перенаправляем на настройки
             match = resolve('/settings/-1/', urlconf='bot.urls')
             match.func(request, *match.args, **match.kwargs)
+
+
+class AlbumView(BaseLine):
+    """ Получить альбом """
+
+    def bot_handler(self, request, *args, **kwargs):
+        self.request.vk_api.messages.send(
+            user_id=self.user_vk.user_vk_id,
+            message=u'А это пока рано..',
+            random_id=random.randint(0, 10000000),
+            keyboard=json.dumps(DEFAULT_KEYBOARD)
+        )
+
+
+class AddHistory(BaseLine):
+    """ Добавление сообщения в историю ребёнка """
+    history_action = 'add'
+
+    def bot_handler(self, request, *args, **kwargs):
+
+        # в messages_dict есть:
+        # 'date', 'from_id', 'id', 'out', 'peer_id', 'text', 'conversation_message_id', 'fwd_messages',
+        # 'important', 'random_id', 'attachments', 'is_hidden']
+
+        message_dict = request.message.message['items'][0]
+        message_date = datetime.datetime.fromtimestamp(message_dict['date'])
+        message_id = message_dict['id']
+        message_text = request.message.all_text
+        photo_list = request.message.photo_list
+        other_attach_exist = request.message.other_attach_exists
+
+        # Если изменение сообщения, то удаляем сообщение и записываем новое
+        if self.history_action == 'edit':
+            delete_history = BabyHistory.objects.filter(message_vk_id=message_id).first()
+            if delete_history:
+                BabyHistoryAttachment.objects.filter(history=delete_history).delete()
+            delete_history.delete()
+
+        if message_text or photo_list:
+            # записываем в историю ребёнка
+            history = BabyHistory.objects.create(
+                baby=self.user_vk.baby,
+                text=message_text,
+                user_vk=self.user_vk,
+                message_vk_id=message_id,
+                date_vk=message_date,
+                other_attach_vk=other_attach_exist
+            )
+            # записываем вложения
+            if photo_list:
+                BabyHistoryAttachment.objects.bulk_create([BabyHistoryAttachment(
+                    history=history,
+                    attachment_type=AttachType.PHOTO,
+                    url=url)
+                for url in photo_list])
+
+        if self.history_action == 'edit':
+            response_msg = 'Вы изменили сообщение - мы применили эти изменения в альбоме :)'
+        else:
+            msg = ''
+            if photo_list:
+                msg = u'Ок. Получил ваши фото ({}шт){}.'.format(len(photo_list), ' и описание' if message_text else '')
+            elif message_text:
+                msg = u'Ок. Информацию принял.'
+
+            if other_attach_exist:
+                msg += '\nИз вложений мы принимаем только фото!'
+            response_msg = '{}\nЕсли есть что ещё - пиши :)'.format(msg)
+
+        self.request.vk_api.messages.send(
+            user_id=self.user_vk.user_vk_id,
+            message=response_msg,
+            random_id=random.randint(0, 10000000),
+            keyboard=json.dumps(DEFAULT_KEYBOARD)
+        )
+        super().bot_handler(request, *args, **kwargs)
+
+
+class EditHistory(AddHistory):
+    """ Изменить сообщение """
+    history_action = 'edit'
 
 
 class StartLine(BaseLine):
@@ -292,15 +243,33 @@ class StartLine(BaseLine):
     def next_message(self, next_question_pk):
         if len(self.question_list) == next_question_pk:  # Если все вопросы отвечены
 
+            is_first_start = self.user_vk.baby is None # Первый старт - если ребёнок ещё не создан
             # Сохраняем данные из всей линии вопросов
             self.save_cleaned_data()
             self.user_vk.wait_payload = None
             self.user_vk.save()
 
+            message = 'Настройки сохранены. Можете продолжать вести альбом :)'
+            if is_first_start:
+                message = 'Спасибо. Теперь мы познакомились.\n'
+                if self.user_vk.baby.is_women:
+                    message += 'У вас малышка {} и ей сейчас {}.\n\n'.format(self.user_vk.baby.first_name,
+                                                                        self.user_vk.baby.get_birth_date_delta_string())
+                else:
+                    message += 'У вас малыш {} и ему сейчас {}.\n\n'.format(self.user_vk.baby.first_name,
+                                                                        self.user_vk.baby.get_birth_date_delta_string())
+                welcome_text = 'Далее - просто присылайте фотографии, ' \
+                       'пишите сообщения, рассказывайте о новых эмоциях, реакциях, умениях, интересах ребёнка.\n' \
+                       'В общем, описывайте всё, что хотите увидеть в будущем альбоме вашего ребёнка :)\n' \
+                       'Это будет ваш мини-блог для наполнения альбома.\n' \
+                       'А я не буду назойливым, и лишь иногда буду напоминать, если вы давно ничем не делились :)'
+
+                message += welcome_text
+
             # Отправляем сообщение что линия закончена
             self.request.vk_api.messages.send(
                 user_id=self.user_vk.user_vk_id,
-                message=u'Спасибо. Теперь мы познакомились. Далее немного расскажу о себе :)',
+                message=message,
                 random_id=random.randint(0, 10000000),
                 keyboard=json.dumps(DEFAULT_KEYBOARD)
             )
@@ -332,4 +301,4 @@ class StartLine(BaseLine):
             Baby.objects.filter(pk=self.user_vk.baby.pk).update(**params)
         else:
             baby = Baby.objects.create(**params)
-            b2u = BabyUserVK.objects.create(user_vk=self.user_vk, baby=baby, last_message_date=datetime.datetime.now())
+            b2u = BabyUserVK.objects.create(user_vk=self.user_vk, baby=baby)

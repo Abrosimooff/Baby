@@ -1,3 +1,4 @@
+import datetime
 import json
 
 from django.db import models
@@ -5,6 +6,7 @@ from django.db.models import CASCADE
 from django.utils.functional import cached_property
 
 from bot.models_utils.jsonfield import JSONField
+from bot.helpers import DateUtil
 
 
 class UserVK(models.Model):
@@ -26,6 +28,10 @@ class UserVK(models.Model):
         """ Ребёнок пользователя, если есть """
         return Baby.objects.filter(babyuservk__user_vk=self).first()
 
+    @property
+    def baby2user(self):
+        return BabyUserVK.objects.filter(user_vk=self).first()
+
 
 class Baby(models.Model):
     """ Младенец """
@@ -37,28 +43,48 @@ class Baby(models.Model):
     birth_date = models.DateField(verbose_name=u'Дата рождения', null=True, blank=True)
     gender = models.PositiveSmallIntegerField(choices=GENDER_CHOICES.items(), verbose_name=u'Пол')
 
+    @cached_property
+    def is_women(self):
+        """ девочка ли? """
+        return self.gender == 1
+
+    def get_birth_date_delta(self, on_date=None):
+        """ Вернуть разницу между ДР ребёнка и выбранной датой в классном формате relativedelta """
+        on_date = on_date or datetime.date.today()
+        return DateUtil().delta(on_date, self.birth_date)
+
+    def get_birth_date_delta_string(self, on_date=None):
+        """ Вернуть разницу между ДР ребёнка и выбранной датой хорошой строкой """
+        on_date = on_date or datetime.date.today()
+        return DateUtil().delta_string(on_date, self.birth_date)
+
 
 class BabyUserVK(models.Model):
     """ Привязка младенца к юзеру ВК. т.е кто может заполнять инфу о ребёнке """
     user_vk = models.ForeignKey(UserVK, on_delete=CASCADE)
     baby = models.ForeignKey(Baby, on_delete=CASCADE)
-    last_message_date = models.DateTimeField(verbose_name=u'Время последнего сообщения от юзера', null=True, blank=True)
 
 
 class BabyHistory(models.Model):
     """ История-Хроника ребёнка """
     baby = models.ForeignKey(Baby, on_delete=CASCADE, verbose_name=u'Младенец')
+    text = models.TextField(verbose_name=u'Текст сообщения')
     user_vk = models.ForeignKey(UserVK, on_delete=CASCADE, verbose_name=u'Автор заметки')
-    text = models.TextField(verbose_name=u'Текст заметки')
     message_vk_id = models.IntegerField(verbose_name=u'ID сообщения ВК')
-    date = models.DateTimeField(verbose_name=u'Дата время заметки')
+    date_vk = models.DateTimeField(verbose_name=u'Дата время сообщения')
+    other_attach_vk = models.BooleanField(verbose_name=u'Есть ли другие вложения в сообщении кроме фото', default=False)
+
+
+class AttachType(object):
+    """ Виды вложений """
+    PHOTO = 'photo'
 
 
 class BabyHistoryAttachment(models.Model):
     """ Вложения к хронике """
     history = models.ForeignKey(BabyHistory, on_delete=CASCADE)
     attachment_type = models.CharField(max_length=50)
-    link = models.URLField(verbose_name=u'Путь')
+    url = models.URLField(verbose_name=u'Путь')
 
 
 # class TalkLineVK(models.Model):
