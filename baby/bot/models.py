@@ -43,6 +43,9 @@ class Baby(models.Model):
     birth_date = models.DateField(verbose_name=u'Дата рождения', null=True, blank=True)
     gender = models.PositiveSmallIntegerField(choices=GENDER_CHOICES.items(), verbose_name=u'Пол')
 
+    def __str__(self):
+        return u'{} {}'.format(self.first_name, str(self.birth_date))
+
     @cached_property
     def is_women(self):
         """ девочка ли? """
@@ -58,6 +61,10 @@ class Baby(models.Model):
         on_date = on_date or datetime.date.today()
         return DateUtil().delta_string(on_date, self.birth_date)
 
+    @cached_property
+    def parent_list(self):
+        """ Кому доступен этот ребёнок """
+        return UserVK.objects.filter(babyuservk__baby=self)
 
 class BabyUserVK(models.Model):
     """ Привязка младенца к юзеру ВК. т.е кто может заполнять инфу о ребёнке """
