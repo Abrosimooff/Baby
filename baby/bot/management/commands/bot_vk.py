@@ -5,5 +5,4 @@ class Command(BaseCommand):
     help = 'start bot vk'
 
     def handle(self, *args, **options):
-        print('vk process started')
         VkHelp().process()

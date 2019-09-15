@@ -3,6 +3,7 @@ import json
 import random
 
 import pytz
+import requests
 from django.db.models import Max
 from django.utils.functional import cached_property
 from vk_api import vk_api
@@ -76,17 +77,27 @@ class VkHelp(object):
     # https://vk.com/dev/emoji
 
     def __init__(self):
+        self.connect()
+
+    def connect(self):
         vk_session = vk_api.VkApi(token=VK_KEY)
-        self.longpoll = VkLongPoll(vk_session)
+        self.longpoll = VkLongPoll(vk_session, wait=3)
         self.vk_api = vk_session.get_api()
+        print('{}: vk connected.'.format(datetime.datetime.now()))
 
     def process(self):
+        print('{}: vk process started.'.format(datetime.datetime.now()))
         for event in self.longpoll.listen():
-            # Теперь пускаем в Action с разными видами событий, а там уже разбирать их)
-            if event.message_id:
-                _message = Message(event.message_id, self.vk_api)
-                bot_request = BotRequest(message=_message, event=event, vk_api=self.vk_api)
-                Action(event, bot_request).run_action()
+            try:
+                # Теперь пускаем в Action с разными видами событий, а там уже разбирать их)
+                if event.message_id:
+                    _message = Message(event.message_id, self.vk_api)
+                    bot_request = BotRequest(message=_message, event=event, vk_api=self.vk_api)
+                    Action(event, bot_request).run_action()
+            except requests.exceptions.RequestException as request_error:
+                print('Request Exception:', request_error)
+                self.connect()
+                self.process()
 
 
 class Sender(object):
