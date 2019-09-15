@@ -1,9 +1,11 @@
 import datetime
 import json
 import random
+import time
 
 import pytz
 import requests
+import urllib3
 from django.db.models import Max
 from django.utils.functional import cached_property
 from vk_api import vk_api
@@ -94,8 +96,10 @@ class VkHelp(object):
                     _message = Message(event.message_id, self.vk_api)
                     bot_request = BotRequest(message=_message, event=event, vk_api=self.vk_api)
                     Action(event, bot_request).run_action()
-            except requests.exceptions.RequestException as request_error:
-                print('Request Exception:', request_error)
+            # except (ConnectionResetError, urllib3.exceptions.ProtocolError, requests.exceptions.ConnectionError) \
+            except Exception as request_error:
+                print('{}: Request Exception: {}'.format(datetime.datetime.now(), request_error))
+                time.sleep(3)
                 self.connect()
                 self.process()
 
