@@ -25,7 +25,7 @@ SECRET_KEY = ')yjx6785%03e+r@1wdbkc=v=s)$+rp@(9@m5cu0!ytbr%f4x@c'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['baby-bot.na4u.ru', 'localhost']
 
 
 # Application definition
