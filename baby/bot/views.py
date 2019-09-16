@@ -51,7 +51,7 @@ class AddHistory(BaseLine):
 
         message_dict = request.message.message['items'][0]
         message_date = datetime.datetime.fromtimestamp(message_dict['date'])
-        message_id = message_dict['id']
+        message_id = request.message.id
         message_text = request.message.all_text
         photo_list = request.message.photo_list
         other_attach_exist = request.message.other_attach_exists
@@ -61,7 +61,7 @@ class AddHistory(BaseLine):
             delete_history = BabyHistory.objects.filter(message_vk_id=message_id).first()
             if delete_history:
                 BabyHistoryAttachment.objects.filter(history=delete_history).delete()
-            delete_history.delete()
+                delete_history.delete()
 
         if message_text or photo_list:
             # записываем в историю ребёнка
