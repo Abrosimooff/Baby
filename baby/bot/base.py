@@ -1,11 +1,18 @@
 import json
 from functools import update_wrapper
+
+from django.http import HttpResponse
 from django.urls import resolve
 from django.utils.decorators import classonlymethod
 from django.views import View
+from django.views.decorators.csrf import csrf_exempt
+from django.views.generic.edit import BaseUpdateView
 from vk_api.longpoll import VkEventType
 
 from bot.models import UserVK
+
+VK_GROUP_ID = 186300624
+VK_SECRET_KEY = '08a48e9e691f4700b70ae37d09ddcbe7'
 
 # Процесс работы:
 # 1. Команда vk_bot
@@ -36,6 +43,7 @@ DEFAULT_KEYBOARD = dict(
         )
      ]]
      )
+
 
 
 class BotRequest(object):
@@ -151,3 +159,21 @@ class BaseLine(View):
     def bot_handler(self, request, *args, **kwargs):
         pass
 
+
+class VkCallback(BaseUpdateView):
+
+    @csrf_exempt
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        return HttpResponse('OK')
+
+    def post(self, request, *args, **kwargs):
+        if request.content_type == 'application/json':
+            self.data = json.loads(request.body)
+            print('VK DATA:', self.data)
+            if self.data.get('type') == 'confirmation' and self.data.get('group') == VK_GROUP_ID:
+                return HttpResponse('6ade2c54')
+
+        return HttpResponse('OK')
