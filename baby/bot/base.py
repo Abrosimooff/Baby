@@ -37,7 +37,26 @@ VK_SECRET_KEY = '08a48e9e691f4700b70ae37d09ddcbe7'
 
 DEFAULT_KEYBOARD = dict(
     one_time=True,
-    buttons=[[
+    buttons=[
+    #     [
+    #     dict(
+    #         action=dict(
+    #             type="text",
+    #             label=u'Ввести рост',
+    #             payload=dict(action='/height')
+    #         ),
+    #         color="secondary"
+    #     ),
+    #     dict(
+    #         action=dict(
+    #             type="text",
+    #             label=u'Ввести вес',
+    #             payload=dict(action='/weight')
+    #         ),
+    #         color="secondary"
+    #     ),
+    # ],
+    [
         dict(
             action=dict(
                 type="text",
@@ -54,8 +73,9 @@ DEFAULT_KEYBOARD = dict(
             ),
             color="secondary"
         )
-     ]]
-     )
+     ]
+    ]
+ )
 
 
 class BotRequest(object):
@@ -216,8 +236,8 @@ class VkCallback(BaseUpdateView):
                 return HttpResponse('6ade2c54')
 
             event = VkBotEvent(raw=self.data)
-
             VkHelp().process_callback(event)
+            # todo при Exception создать модель ErrorEvent
         return HttpResponse('OK')
 
 

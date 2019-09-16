@@ -4,8 +4,9 @@ import random
 from django.urls import resolve
 
 from bot.base import BaseLine, DEFAULT_KEYBOARD
-from bot.models import UserVK, Baby, BabyUserVK, BabyHistory, BabyHistoryAttachment, AttachType
-from bot.validators import ValidateGenderList, FirstNameValidate, ValidateYearList, ValidateMonthList, ValidateBirthDate
+from bot.models import UserVK, Baby, BabyUserVK, BabyHistory, BabyHistoryAttachment, AttachType, BabyHeight, BabyWeight
+from bot.validators import ValidateGenderList, FirstNameValidate, ValidateYearList, ValidateMonthList, \
+    ValidateBirthDate, HeightValidate, WeightValidate
 
 
 class Welcome(BaseLine):
@@ -37,6 +38,41 @@ class AlbumView(BaseLine):
             random_id=random.randint(0, 10000000),
             keyboard=json.dumps(DEFAULT_KEYBOARD)
         )
+
+class MeasureView(BaseLine):
+    model = None
+    validator_class = None
+
+    def bot_handler(self, request, *args, **kwargs):
+        pass
+        # self.validator_class()
+        # if self.validator.is_valid()
+        #
+        # measure = self.model.objects.filter(baby=self.user_vk.baby, date=datetime.date.today()).first()
+        # if measure:
+        #     measure.save()
+        # else:
+        #     create measure
+            # pass
+
+        # self.request.vk_api.messages.send(
+        #     user_id=self.user_vk.user_vk_id,
+        #     message=u'А это пока рано..',
+        #     random_id=random.randint(0, 10000000),
+        #     keyboard=json.dumps(DEFAULT_KEYBOARD)
+        # )
+
+
+class HeightView(MeasureView):
+    """ Заполнить рост """
+    model = BabyHeight
+    validator_class = HeightValidate
+
+
+class WeightView(MeasureView):
+    """ Заполнить вес """
+    model = BabyWeight
+    validator_class = WeightValidate
 
 
 class AddHistory(BaseLine):

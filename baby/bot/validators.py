@@ -92,3 +92,47 @@ class FirstNameValidate(BaseValidate):
             return True
         self.error_message = u'Слишком длинное имя.'
         return False
+
+
+class HeightValidate(BaseValidate):
+    """ Валидатор Роста в см """
+
+    def is_valid(self):
+        if isinstance(self.value, str):
+            if self.value.isdigit():
+                val = int(self.value)
+            else:
+                self.error_message = u'Напишите просто цифру - рост в сантиметрах!'
+                return False
+        else:
+            val = self.value
+
+        if val < 30:
+            self.error_message = u'Слишко маленькое значение - возможно вы ошиблись.'
+            return False
+        if val > 150:
+            self.error_message = u'Слишко большое значение - возможно вы ошиблись.'
+            return False
+        return True
+
+
+class WeightValidate(BaseValidate):
+    """ Валидатор веса в граммах  """
+
+    def is_valid(self):
+        if isinstance(self.value, str):
+            if self.value.isdigit():
+                val = int(self.value)
+            else:
+                self.error_message = u'Напишите просто цифру - вес в граммах!'
+                return False
+        else:
+            val = self.value
+
+        if val < 500:
+            self.error_message = u'Слишко маленькое значение - возможно вы ошиблись.'
+            return False
+        if val > 50000:
+            self.error_message = u'Слишко большое значение - возможно вы ошиблись.'
+            return False
+        return True

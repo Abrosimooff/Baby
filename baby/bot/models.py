@@ -66,6 +66,7 @@ class Baby(models.Model):
         """ Кому доступен этот ребёнок """
         return UserVK.objects.filter(babyuservk__baby=self)
 
+
 class BabyUserVK(models.Model):
     """ Привязка младенца к юзеру ВК. т.е кто может заполнять инфу о ребёнке """
     user_vk = models.ForeignKey(UserVK, on_delete=CASCADE)
@@ -94,9 +95,21 @@ class BabyHistoryAttachment(models.Model):
     url = models.URLField(verbose_name=u'Путь')
 
 
-# class TalkLineVK(models.Model):
-#     """ Линия разговора """
-#     name = models.CharField(verbose_name=u'Название линии разговора', max_length=100)
-#     user_vk = models.ForeignKey(UserVK, on_delete=CASCADE)
-#     path = models.CharField(max_length=100, verbose_name=u'Путь к вопросу')
-#     answer = models.TextField(verbose_name=u'Ответ')
+class BabyHeight(models.Model):
+    """ Рост ребёнка """
+    baby = models.ForeignKey(Baby, on_delete=CASCADE)
+    date = models.DateField(verbose_name=u'Дата измерения')
+    height = models.PositiveSmallIntegerField(verbose_name=u'Рост в сантиметрах')
+
+    class Meta:
+        unique_together = ['baby', 'date']
+
+
+class BabyWeight(models.Model):
+    """ Вес ребёнка """
+    baby = models.ForeignKey(Baby, on_delete=CASCADE)
+    date = models.DateField(verbose_name=u'Дата измерения')
+    weight = models.PositiveSmallIntegerField(verbose_name=u'Вес в граммах')
+
+    class Meta:
+        unique_together = ['baby', 'date']
