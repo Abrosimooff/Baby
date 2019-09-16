@@ -47,26 +47,11 @@ class MeasureView(BaseLine):
     def get_message(self):
         return ''
 
-    # def error_response(self, question_pk, error_message=u'Ошибка!'):
-    #     current_question = self.question_list[question_pk]
-    #     user_payload = self.user_vk.wait_payload_dict
-    #     user_payload['action'] = '/settings/1/'.format(question_pk)
-    #     self.user_vk.wait_payload = user_payload
-    #     self.user_vk.save()
-    #     self.request.vk_api.messages.send(
-    #         user_id=self.user_vk.user_vk_id,
-    #         message=u'{}\n{}'.format(error_message, current_question['message']),
-    #         random_id=random.randint(0, 10000000),
-    #         keyboard=json.dumps(current_question.get('keyboard', {}))
-    #     )
-
-
     def bot_handler(self, request, *args, **kwargs):
         question_pk = kwargs.get('question_pk')
-
         # Пишем, что мол напишите цифру
         if question_pk == '0':
-            self.user_vk.wait_payload = dict(action='{}/1/'.format(self.field_name))
+            self.user_vk.wait_payload = dict(action='/{}/1/'.format(self.field_name))
             self.user_vk.save()
             self.request.vk_api.messages.send(
                 user_id=self.user_vk.user_vk_id,
@@ -85,9 +70,8 @@ class MeasureView(BaseLine):
                     setattr(measure, self.field_name, validator_obj.value)
                     measure.save()
                 else:
-                    self.model.objects.create(
-                        baby=self.user_vk.baby,
-                        date=datetime.date.today(), **{self.field_name: validator_obj.value})
+                    measure = self.model.objects.create(
+                        baby=self.user_vk.baby, date=datetime.date.today(), **{self.field_name: validator_obj.value})
 
                 # Отвечаем, что приняли показания
                 self.user_vk.wait_payload = None
@@ -101,7 +85,7 @@ class MeasureView(BaseLine):
                 )
             else:
                 # Отвечаем, что ОШИБКА! Ждём ответ ещё раз
-                self.user_vk.wait_payload = dict(action='{}/1/'.format(self.field_name))
+                self.user_vk.wait_payload = dict(action='/{}/1/'.format(self.field_name))
                 self.user_vk.save()
                 self.request.vk_api.messages.send(
                     user_id=self.user_vk.user_vk_id,
