@@ -183,6 +183,9 @@ class BaseLine(View):
         return view
 
     def dispatch(self, request, *args, **kwargs):
+        if request.message.user_id < 0:
+            print('SKIP MESSAGE:', request.message.item)  # если сюда попало исходящее сообщение от группы
+            return HttpResponse('OK')
         try:
             self.user_vk = UserVK.objects.get(user_vk_id=request.message.user_id)
         except UserVK.DoesNotExist:
@@ -228,6 +231,7 @@ class Message(object):
     def __init__(self, message_id, vk_api):
         self.vk_api = vk_api
         self.message = self.vk_api.messages.getById(message_ids=message_id)
+        print('MESSAGE:', self.item)
 
 
     @cached_property
