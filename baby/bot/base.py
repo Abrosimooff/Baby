@@ -104,7 +104,7 @@ class Action(object):
                 return '/welcome'
 
             # Если нажали на кнопку
-            if hasattr(self.bot_request.event, 'payload'):
+            if self.bot_request.message.payload:
                 payload = json.loads(self.bot_request.message.payload)
                 return payload['action']
 
