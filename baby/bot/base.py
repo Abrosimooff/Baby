@@ -1,7 +1,7 @@
 import json
 from functools import update_wrapper
 
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseForbidden
 from django.urls import resolve
 from django.utils.decorators import classonlymethod
 from django.views import View
@@ -172,8 +172,10 @@ class VkCallback(BaseUpdateView):
     def post(self, request, *args, **kwargs):
         if request.content_type == 'application/json':
             self.data = json.loads(request.body)
-            print('VK DATA:', self.data)
-            if self.data.get('type') == 'confirmation' and self.data.get('group') == VK_GROUP_ID:
-                return HttpResponse('6ade2c54')
+            if self.data['secret'] != VK_SECRET_KEY:
+                return HttpResponseForbidden()
 
+            print('VK DATA:', self.data)
+            if self.data.get('type') == 'confirmation' and self.data.get('group_id') == VK_GROUP_ID:
+                return HttpResponse('6ade2c54')
         return HttpResponse('OK')
