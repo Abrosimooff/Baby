@@ -15,7 +15,7 @@ class Welcome(BaseLine):
         super().bot_handler(request, *args, **kwargs)
         if not self.user_vk:
             # Отправляем первое сообщение
-            self.user_vk = UserVK.objects.create(user_vk_id=request.event.user_id)
+            self.user_vk = UserVK.objects.create(user_vk_id=request.message.user_id)
             request.vk_api.messages.send(
                 user_id=self.user_vk.user_vk_id,
                 message='Привет. Начнём создавать альбом для твоего ребёнка :)\n'
@@ -216,13 +216,13 @@ class StartLine(BaseLine):
         if 'cleaned_data' not in user_payload:
             user_payload['cleaned_data'] = {}
 
-        answer = self.request.event.text  # Ответом считаем то, что написал юзер
-        if hasattr(self.request.event, 'payload'):  # но если есть payload, значит ответ в нём
-            payload_dict = json.loads(self.request.event.payload)
+        answer = self.request.message.text  # Ответом считаем то, что написал юзер
+        if self.request.message.payload:  # но если есть payload, значит ответ в нём
+            payload_dict = json.loads(self.request.message.payload)
             answer = payload_dict['answer']
 
         # print('question:', current_question['message'])
-        # print('answer:', self.request.event.text)
+        # print('answer:', self.request.message.text)
         # print('user_payload:', user_payload)
 
         # Валидируем ответ, если валидатор указан
