@@ -38,24 +38,24 @@ VK_SECRET_KEY = '08a48e9e691f4700b70ae37d09ddcbe7'
 DEFAULT_KEYBOARD = dict(
     one_time=True,
     buttons=[
-    #     [
-    #     dict(
-    #         action=dict(
-    #             type="text",
-    #             label=u'Ввести рост',
-    #             payload=dict(action='/height')
-    #         ),
-    #         color="secondary"
-    #     ),
-    #     dict(
-    #         action=dict(
-    #             type="text",
-    #             label=u'Ввести вес',
-    #             payload=dict(action='/weight')
-    #         ),
-    #         color="secondary"
-    #     ),
-    # ],
+        [
+        dict(
+            action=dict(
+                type="text",
+                label=u'Ввести рост',
+                payload=dict(action='/height/0/')
+            ),
+            color="secondary"
+        ),
+        dict(
+            action=dict(
+                type="text",
+                label=u'Ввести вес',
+                payload=dict(action='/weight/0/')
+            ),
+            color="secondary"
+        ),
+    ],
     [
         dict(
             action=dict(
@@ -217,6 +217,8 @@ class BaseLine(View):
 
 
 class VkCallback(BaseUpdateView):
+    event = None
+    data = None
 
     @csrf_exempt
     def dispatch(self, request, *args, **kwargs):
@@ -224,6 +226,15 @@ class VkCallback(BaseUpdateView):
 
     def get(self, request, *args, **kwargs):
         return HttpResponse('OK')
+
+    @cached_property
+    def is_test_mode(self):
+        """ Если тестовый юзер, то при сallback API - бот ничего не делает  """
+        try:
+            from baby.settings_local import TEST_USERS_VK
+            return self.event.object['user_id'] in TEST_USERS_VK
+        except ImportError:
+            return False
 
     def post(self, request, *args, **kwargs):
         if request.content_type == 'application/json':
@@ -235,8 +246,12 @@ class VkCallback(BaseUpdateView):
             if self.data.get('type') == 'confirmation' and self.data.get('group_id') == VK_GROUP_ID:
                 return HttpResponse('6ade2c54')
 
-            event = VkBotEvent(raw=self.data)
-            VkHelp().process_callback(event)
+            self.event = VkBotEvent(raw=self.data)
+
+            if self.is_test_mode:  # Если тестовый юзер
+                return HttpResponse('OK')
+
+            VkHelp().process_callback(self.event)
             # todo при Exception создать модель ErrorEvent
         return HttpResponse('OK')
 

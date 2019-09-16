@@ -41,38 +41,95 @@ class AlbumView(BaseLine):
 
 class MeasureView(BaseLine):
     model = None
+    field_name = ''
     validator_class = None
 
-    def bot_handler(self, request, *args, **kwargs):
-        pass
-        # self.validator_class()
-        # if self.validator.is_valid()
-        #
-        # measure = self.model.objects.filter(baby=self.user_vk.baby, date=datetime.date.today()).first()
-        # if measure:
-        #     measure.save()
-        # else:
-        #     create measure
-            # pass
+    def get_message(self):
+        return ''
 
-        # self.request.vk_api.messages.send(
-        #     user_id=self.user_vk.user_vk_id,
-        #     message=u'А это пока рано..',
-        #     random_id=random.randint(0, 10000000),
-        #     keyboard=json.dumps(DEFAULT_KEYBOARD)
-        # )
+    # def error_response(self, question_pk, error_message=u'Ошибка!'):
+    #     current_question = self.question_list[question_pk]
+    #     user_payload = self.user_vk.wait_payload_dict
+    #     user_payload['action'] = '/settings/1/'.format(question_pk)
+    #     self.user_vk.wait_payload = user_payload
+    #     self.user_vk.save()
+    #     self.request.vk_api.messages.send(
+    #         user_id=self.user_vk.user_vk_id,
+    #         message=u'{}\n{}'.format(error_message, current_question['message']),
+    #         random_id=random.randint(0, 10000000),
+    #         keyboard=json.dumps(current_question.get('keyboard', {}))
+    #     )
+
+
+    def bot_handler(self, request, *args, **kwargs):
+        question_pk = kwargs.get('question_pk')
+
+        # Пишем, что мол напишите цифру
+        if question_pk == '0':
+            self.user_vk.wait_payload = dict(action='{}/1/'.format(self.field_name))
+            self.user_vk.save()
+            self.request.vk_api.messages.send(
+                user_id=self.user_vk.user_vk_id,
+                message=self.get_message(),
+                random_id=random.randint(0, 10000000),
+                # keyboard=json.dumps(DEFAULT_KEYBOARD)
+            )
+
+        # Разбироаем ответ
+        elif question_pk == '1':
+            answer = self.request.message.text
+            validator_obj = self.validator_class(answer)
+            if validator_obj.is_valid():
+                measure = self.model.objects.filter(baby=self.user_vk.baby, date=datetime.date.today()).first()
+                if measure:
+                    setattr(measure, self.field_name, validator_obj.value)
+                    measure.save()
+                else:
+                    self.model.objects.create(
+                        baby=self.user_vk.baby,
+                        date=datetime.date.today(), **{self.field_name: validator_obj.value})
+
+                # Отвечаем, что приняли показания
+                self.user_vk.wait_payload = None
+                self.user_vk.save()
+                self.request.vk_api.messages.send(
+                    user_id=self.user_vk.user_vk_id,
+                    message='Готово. Спасибо, что передали показания!)\n'
+                            'Можете продолжать вести альбом :)',
+                    random_id=random.randint(0, 10000000),
+                    keyboard=json.dumps(DEFAULT_KEYBOARD)
+                )
+            else:
+                # Отвечаем, что ОШИБКА! Ждём ответ ещё раз
+                self.user_vk.wait_payload = dict(action='{}/1/'.format(self.field_name))
+                self.user_vk.save()
+                self.request.vk_api.messages.send(
+                    user_id=self.user_vk.user_vk_id,
+                    message=validator_obj.error_message,
+                    random_id=random.randint(0, 10000000),
+                    # keyboard=json.dumps(DEFAULT_KEYBOARD)
+                )
 
 
 class HeightView(MeasureView):
     """ Заполнить рост """
     model = BabyHeight
+    field_name = 'height'
     validator_class = HeightValidate
+
+    def get_message(self):
+        gstr = 'доросла' if self.user_vk.baby.is_women else 'дорос'
+        return 'Напишите до скольки сантиметров уже {} {}?'.format(gstr, self.user_vk.baby.first_name.capitalize())
 
 
 class WeightView(MeasureView):
     """ Заполнить вес """
     model = BabyWeight
+    field_name = 'weight'
     validator_class = WeightValidate
+
+    def get_message(self):
+        return 'Напишите cколько граммов уже весит {}?'.format(self.user_vk.baby.first_name.capitalize())
 
 
 class AddHistory(BaseLine):

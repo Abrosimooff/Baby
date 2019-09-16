@@ -108,10 +108,12 @@ class HeightValidate(BaseValidate):
             val = self.value
 
         if val < 30:
-            self.error_message = u'Слишко маленькое значение - возможно вы ошиблись.'
+            self.error_message = u'Слишком маленькое значение - возможно вы ошиблись.\n' \
+                                 u'Ещё раз напишите рост в сантиметрах'
             return False
         if val > 150:
-            self.error_message = u'Слишко большое значение - возможно вы ошиблись.'
+            self.error_message = u'Слишком большое значение - возможно вы ошиблись.\n' \
+                                 u'Ещё раз напишите рост в сантиметрах'
             return False
         return True
 
@@ -130,9 +132,9 @@ class WeightValidate(BaseValidate):
             val = self.value
 
         if val < 500:
-            self.error_message = u'Слишко маленькое значение - возможно вы ошиблись.'
+            self.error_message = u'Слишком маленькое значение - возможно вы ошиблись.\nЕщё раз напишите вес в граммах'
             return False
         if val > 50000:
-            self.error_message = u'Слишко большое значение - возможно вы ошиблись.'
+            self.error_message = u'Слишком большое значение - возможно вы ошиблись.\nЕщё раз напишите вес в граммах'
             return False
         return True

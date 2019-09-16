@@ -9,8 +9,8 @@ urlpatterns = [
     url(r'^add_history', AddHistory.as_view()),
     url(r'^edit_history', EditHistory.as_view()),
     url(r'^album', AlbumView.as_view()),
-    url(r'^height', HeightView.as_view()),
-    url(r'^weight', WeightView.as_view()),
+    url(r'^height/(?P<question_pk>.+)/', HeightView.as_view()),
+    url(r'^weight/(?P<question_pk>.+)/', WeightView.as_view()),
 
     url(r'^vk/callback/', VkCallback.as_view())
 ]
