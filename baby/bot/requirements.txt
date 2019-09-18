@@ -2,3 +2,4 @@ django==2.2.5
 python-dateutil
 vk-api==11.5.0
 mysqlclient
+hashids

@@ -73,7 +73,25 @@ DEFAULT_KEYBOARD = dict(
             ),
             color="secondary"
         )
-     ]
+     ],
+    [
+        dict(
+            action=dict(
+                type="text",
+                label=u'Поделиться',
+                payload=dict(action='/sharing/')
+            ),
+            color="secondary"
+        ),
+        dict(
+            action=dict(
+                type="text",
+                label=u'Помощь',
+                payload=dict(action='/help/')
+            ),
+            color="secondary"
+        ),
+    ]
     ]
  )
 

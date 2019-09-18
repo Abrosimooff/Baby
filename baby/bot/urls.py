@@ -1,7 +1,8 @@
 from django.conf.urls import url
 
 from bot.base import VkCallback
-from bot.views import StartLine, Welcome, AddHistory, AlbumView, EditHistory, HeightView, WeightView
+from bot.views import StartLine, Welcome, AddHistory, AlbumView, EditHistory, HeightView, WeightView, SharingView, \
+    HelpView, SharingGetView
 
 urlpatterns = [
     url(r'^welcome', Welcome.as_view()),
@@ -11,6 +12,9 @@ urlpatterns = [
     url(r'^album', AlbumView.as_view()),
     url(r'^height/(?P<question_pk>.+)/', HeightView.as_view()),
     url(r'^weight/(?P<question_pk>.+)/', WeightView.as_view()),
+    url(r'^sharing/$', SharingView.as_view()),
+    url(r'^sharing/get/$', SharingGetView.as_view()),
+    url(r'^help/', HelpView.as_view()),
 
     url(r'^vk/callback/', VkCallback.as_view())
 ]

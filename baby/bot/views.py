@@ -1,6 +1,7 @@
 import datetime
 import json
 import random
+import hashids
 from django.urls import resolve
 
 from bot.base import BaseLine, DEFAULT_KEYBOARD
@@ -10,22 +11,58 @@ from bot.validators import ValidateGenderList, FirstNameValidate, ValidateYearLi
 
 
 class Welcome(BaseLine):
-    """ Первое приветственное сообщение и перенаправление на настройки """
+    """ Первое приветственное сообщение и перенаправление на настройки|код ребёнка """
+
+    keyboard = dict(
+        one_time=True,
+        buttons=[
+            [
+                dict(
+                    action=dict(
+                        type="text",
+                        label=u'Код ребёнка',
+                        payload=dict(action='/sharing/get/')
+                    ),
+                    color="secondary"
+                ),
+                dict(
+                    action=dict(
+                        type="text",
+                        label=u'Новый альбом',
+                        payload=dict(action='/settings/-1/')
+                    ),
+                    color="secondary"
+                ),
+            ]
+        ])
 
     def bot_handler(self, request, *args, **kwargs):
         super().bot_handler(request, *args, **kwargs)
         if not self.user_vk:
             # Отправляем первое сообщение
             self.user_vk = UserVK.objects.create(user_vk_id=request.message.user_id)
+
+        if not self.user_vk.baby:
             request.vk_api.messages.send(
                 user_id=self.user_vk.user_vk_id,
+                keyboard=json.dumps(self.keyboard),
                 message='Привет. Начнём создавать альбом для твоего ребёнка :)\n'
-                        'Для начала немного расскажи о своём малыше.',
+                        'Если стобой поделились кодом ребёнка - жми "Код ребёнка".\n'
+                        'Если будем заводить новый альбом - жми "Новый альбом"',
                 random_id=random.randint(0, 10000000)
             )
-            # Перенаправляем на настройки
-            match = resolve('/settings/-1/', urlconf='bot.urls')
-            match.func(request, *match.args, **match.kwargs)
+        else:
+            self.user_vk.wait_payload = None
+            self.user_vk.save()
+            request.vk_api.messages.send(
+                user_id=self.user_vk.user_vk_id,
+                message='Продолжайте вести ваш альбом :)',
+                random_id=random.randint(0, 10000000)
+            )
+
+            # # Перенаправляем на настройки
+            # match = resolve('/settings/-1/', urlconf='bot.urls')
+            # match.func(request, *match.args, **match.kwargs)
 
 
 class AlbumView(BaseLine):
@@ -38,6 +75,7 @@ class AlbumView(BaseLine):
             random_id=random.randint(0, 10000000),
             keyboard=json.dumps(DEFAULT_KEYBOARD)
         )
+
 
 class MeasureView(BaseLine):
     model = None
@@ -115,6 +153,125 @@ class WeightView(MeasureView):
     def get_message(self):
         return 'Напишите cколько граммов уже весит {}?'.format(self.user_vk.baby.first_name.capitalize())
 
+
+class SharingView(BaseLine):
+    """ Совместный доступ (Поделиться) :Инфо """
+
+    def bot_handler(self, request, *args, **kwargs):
+        super().bot_handler(request, *args, **kwargs)
+        code = hashids.Hashids().encode(self.user_vk.user_vk_id, self.user_vk.baby.id)
+        info = 'Совместный доступ.\n' \
+               'Заполняйте альбом своего ребёнка всей семьёй :)\n' \
+               'Поделитесь кодом с родственниками - они укажут этот код при первом знакомстве с ботом ' \
+               'и будут вести альбом вместе с вами.\n' \
+               'Сейчас вам придёт сообщение с кодом, чтобы вы могли им поделиться.'
+
+        self.user_vk.wait_payload = None
+        self.user_vk.save()
+        self.request.vk_api.messages.send(
+            user_id=self.user_vk.user_vk_id,
+            message=info,
+            random_id=random.randint(0, 10000000),
+            keyboard=json.dumps(DEFAULT_KEYBOARD)
+        )
+        user_data = self.request.vk_api.users.get(user_ids=self.user_vk.user_vk_id)
+        self.request.vk_api.messages.send(
+            user_id=self.user_vk.user_vk_id,
+            message='Поделился: @id{} ({} {})\n'
+                    'Сообщество: @public186300624 (Альбом младенца. Бот)\n'
+                    'Ребёнок: {}\n'
+                    'Код доступа: {}'.format(self.user_vk.user_vk_id, user_data[0]['first_name'], user_data[0]['last_name'], self.user_vk.baby.first_name, code),
+            random_id=random.randint(0, 10000000),
+            keyboard=json.dumps(DEFAULT_KEYBOARD)
+        )
+
+
+class SharingGetView(BaseLine):
+    """ Прикрепить себе альбом ребёнка по коду """
+
+    keyboard = dict(
+        one_time=True,
+        buttons=[
+            [
+                dict(
+                    action=dict(
+                        type="text",
+                        label=u'Отмена',
+                        payload=dict(action='/welcome')
+                    ),
+                    color="secondary"
+                ),
+            ]
+        ])
+
+    def send(self, message, payload=None, keyboard=None):
+        self.user_vk.wait_payload = payload
+        self.user_vk.save()
+        self.request.vk_api.messages.send(
+            user_id=self.user_vk.user_vk_id,
+            message=message,
+            random_id=random.randint(0, 10000000),
+            keyboard=json.dumps(keyboard or self.keyboard)
+        )
+
+    def bot_handler(self, request, *args, **kwargs):
+        super().bot_handler(request, *args, **kwargs)
+        RESTART = dict(action='/sharing/get/')
+
+        # Если нужно отправить первое сообщение, мол шлите код
+        if not self.user_vk.wait_payload:
+            self.send('Ок, присылайте код.', payload=RESTART)
+        else:
+            text = self.request.message.text
+            result_code = hashids.Hashids().decode(text)
+            if not result_code:
+                self.send('Не можем распознать такой код.', payload=RESTART)
+                return
+
+            baby = Baby.objects.filter(pk=result_code[1], babyuservk__user_vk__user_vk_id=result_code[0]).first()
+            if not baby:
+                self.send('Не можем найти такого ребёнка', payload=RESTART)
+                return
+
+            if not BabyUserVK.objects.filter(baby=baby, user_vk=self.user_vk).exists():
+                BabyUserVK.objects.create(baby=baby, user_vk=self.user_vk)
+
+            self.send(self.finish_message, payload=None, keyboard=DEFAULT_KEYBOARD)
+            return
+
+    @property
+    def finish_message(self):
+        message = 'Вы присоединились к ведению альбома.\n'
+        if self.user_vk.baby.is_women:
+             message += 'В альбоме - малышка {} и ей сейчас {}.\n\n'\
+                 .format(self.user_vk.baby.first_name, self.user_vk.baby.get_birth_date_delta_string())
+        else:
+            message += 'В альбоме - малыш {} и ему сейчас {}.\n\n'\
+                 .format(self.user_vk.baby.first_name, self.user_vk.baby.get_birth_date_delta_string())
+        welcome_text = 'Далее - просто присылайте фотографии, ' \
+                       'пишите сообщения, рассказывайте о новых эмоциях, реакциях, умениях, интересах ребёнка.\n' \
+                       'В общем, описывайте всё, что хотите увидеть в будущем альбоме вашего ребёнка :)\n' \
+                       'Это будет ваш мини-блог для наполнения альбома.\n' \
+                       'А я не буду назойливым, и лишь иногда буду напоминать, если вы давно ничем не делились :)'
+        return message + welcome_text
+
+
+class HelpView(BaseLine):
+    """  Страница помощи :Инфо"""
+
+    def bot_handler(self, request, *args, **kwargs):
+        super().bot_handler(request, *args, **kwargs)
+        self.user_vk.wait_payload = None
+        self.user_vk.save()
+        self.request.vk_api.messages.send(
+            user_id=self.user_vk.user_vk_id,
+            message='Есть вопросы?\n'
+                    'Можете написать администратору сообщества:\n'
+                    'VK: @abrosimooff (Виктор Абросимов)\n'
+                    'email: abrosimooff@gmail.com',
+            random_id=random.randint(0, 10000000),
+            keyboard=json.dumps(DEFAULT_KEYBOARD)
+        )
 
 class AddHistory(BaseLine):
     """ Добавление сообщения в историю ребёнка """
