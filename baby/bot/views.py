@@ -286,8 +286,10 @@ class AddHistory(BaseLine):
         message_dict = request.message.message['items'][0]
         message_date = datetime.datetime.fromtimestamp(message_dict['date'])
         message_id = request.message.id
-        message_text = request.message.all_text
+        message_text = request.message.text
         photo_list = request.message.photo_list
+        if not photo_list:  # Если нет фоток, то собираем текст (вдруг есть перисланные сообщения)
+            message_text = request.message.all_text
         other_attach_exist = request.message.other_attach_exists
 
         # Если изменение сообщения, то удаляем сообщение и записываем новое
