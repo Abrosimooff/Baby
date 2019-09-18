@@ -7,7 +7,7 @@ from functools import update_wrapper
 from django.db.models import Max
 from django.utils.functional import cached_property
 from django.http import HttpResponse, HttpResponseForbidden
-from django.urls import resolve
+from django.urls import resolve, Resolver404
 from django.utils.decorators import classonlymethod
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
@@ -158,14 +158,24 @@ class Action(object):
             return '/edit_history'
 
     def run_action(self):
-        print('action', self.action)
+        print('{}: user_vk: {}, action: {}'.format(datetime.datetime.now(), self.bot_request.message.user_id, self.action))
         if self.action:
-            match = resolve(self.action, urlconf='bot.urls')
-            if match:
-                func = match.func
-                args = match.args
-                kwargs = match.kwargs
-                func(self.bot_request, *args, **kwargs)
+            try:
+                if self.action[0] != '/':
+                    self.action = '/' + self.action
+                match = resolve(self.action, urlconf='bot.urls')
+                if match:
+                    func = match.func
+                    args = match.args
+                    kwargs = match.kwargs
+                    func(self.bot_request, *args, **kwargs)
+            except Resolver404:
+                self.bot_request.vk_api.messages.send(
+                    user_id=self.bot_request.message.user_id,
+                    message=u'Упс.. команда не распознана.. ',
+                    random_id=random.randint(0, 10000000),
+                    # keyboard=json.dumps(DEFAULT_KEYBOARD)
+                )
 
 
 class CallbackAction(Action):

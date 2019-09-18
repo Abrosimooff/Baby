@@ -10,6 +10,8 @@ class DateUtil:
     def delta_string(self, max_date, min_date):
         delta=self.delta(max_date, min_date)
         data_list = []
+        if not delta.year and not delta.months and not delta.weeks:
+            return 'всего несколько дней'
         if delta.years:
             data_list.append('{} {}'.format(delta.years, self.year_str(delta.years)))
         if delta.months:
