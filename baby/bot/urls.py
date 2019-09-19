@@ -18,5 +18,5 @@ urlpatterns = [
 
     url(r'^vk/callback/', VkCallback.as_view()),
 
-    url(r'^album/print/(?P<album_pk>.+)/$', AlbumPrint.as_view())
+    url(r'^album/print/(?P<album_pk>.+)/(?P<baby_pk>.+)/$', AlbumPrint.as_view())
 ]

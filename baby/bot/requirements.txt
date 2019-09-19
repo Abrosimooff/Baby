@@ -3,3 +3,4 @@ python-dateutil
 vk-api==11.5.0
 mysqlclient
 hashids
+Jinja2

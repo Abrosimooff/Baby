@@ -543,4 +543,16 @@ class StartLine(BaseLine):
 
 class AlbumPrint(TemplateView):
     """ Формируем альбом """
-    template_name = 'bot/album1_landscape.html'
+    # template_name = 'bot/album1_landscape.html'
+
+    def get_template_names(self):
+        return 'bot/album{}_landscape.html'.format(self.kwargs['album_pk'])
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        baby_id = kwargs['baby_pk']
+        baby = Baby.objects.filter(pk=baby_id).first()
+        print(baby)
+        ctx['baby'] = baby
+        return ctx
+
