@@ -3,6 +3,7 @@ import json
 import random
 import hashids
 from django.urls import resolve
+from django.views.generic import TemplateView
 
 from bot.base import BaseLine, DEFAULT_KEYBOARD
 from bot.models import UserVK, Baby, BabyUserVK, BabyHistory, BabyHistoryAttachment, AttachType, BabyHeight, BabyWeight
@@ -538,3 +539,8 @@ class StartLine(BaseLine):
         else:
             baby = Baby.objects.create(**params)
             b2u = BabyUserVK.objects.create(user_vk=self.user_vk, baby=baby)
+
+
+class AlbumPrint(TemplateView):
+    """ Формируем альбом """
+    template_name = 'bot/album1_landscape.html'

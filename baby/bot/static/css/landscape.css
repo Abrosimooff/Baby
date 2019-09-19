@@ -1,0 +1,60 @@
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: #FAFAFA;
+    font: 12pt "Tahoma";
+}
+* {
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+}
+.page {
+    position: relative;
+    width: 297mm;
+    max-width: 297mm;
+    min-height: 210mm;
+    padding: 20mm;
+    margin: 10mm auto;
+    border: 1px #D3D3D3 solid;
+    border-radius: 5px;
+    background: white;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+.subpage {
+    /*padding: 1cm;*/
+    /*border: 5px #fff solid;*/
+    height: 169mm;
+    outline: 2cm transparent solid;
+}
+
+.photo{max-height: 10cm; max-width: 10cm;}
+
+/* Абсолютное позиционирование */
+.pos-left-top{position: absolute; left:2cm; top:2cm}
+.pos-left-bottom{position: absolute; left:2cm; bottom:2cm}
+.pos-right-top{position: absolute; right:2cm; top:2cm}
+.pos-right-bottom{position: absolute; right:2cm; bottom:2cm}
+
+@page {
+    size: A4 landscape;
+    margin: 0;
+}
+@media print {
+    * {-webkit-print-color-adjust:exact;}
+    html, body {
+        width: 297mm;
+        height: 210mm;
+    }
+    .page {
+        margin: 0;
+        border: initial;
+        border-radius: initial;
+        width: initial;
+        min-height: initial;
+        box-shadow: initial;
+        background: initial;
+        page-break-after: always;
+    }
+}
