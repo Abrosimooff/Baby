@@ -54,10 +54,10 @@ ROOT_URLCONF = 'baby.urls'
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.jinja2.Jinja2',
+        # 'BACKEND': 'django.template.backends.jinja2.Jinja2',
+        'BACKEND': 'bot.utils.jinja2.CustomJinja2',
         'DIRS': [os.path.join(BASE_DIR, 'bot', 'templates')],
         'APP_DIRS': True,
-        'OPTIONS': {'environment': 'bot.utils.django_jinja2.Environment', },
     },
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -102,7 +102,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'Ru-ru' # 'en-us'
 
 TIME_ZONE = 'UTC'
 

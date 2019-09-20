@@ -29,13 +29,20 @@ body {
     outline: 2cm transparent solid;
 }
 
+.photo-wrap{height: 9cm; width: 9cm;}
 .photo{max-height: 10cm; max-width: 10cm;}
 
 /* Абсолютное позиционирование */
-.pos-left-top{position: absolute; left:2cm; top:2cm}
-.pos-left-bottom{position: absolute; left:2cm; bottom:2cm}
-.pos-right-top{position: absolute; right:2cm; top:2cm}
-.pos-right-bottom{position: absolute; right:2cm; bottom:2cm}
+.pos-left-top{position: absolute; left:2cm; top:1cm}
+.pos-left-bottom{position: absolute; left:2cm; bottom:1cm}
+.pos-right-top{position: absolute; right:2cm; top:1cm}
+.pos-right-bottom{position: absolute; right:2cm; bottom:1cm}
+
+/* Абсолютное позиционирование текста */
+.text.pos-left-top{position: absolute; left:2cm; top:2cm}
+.text.pos-left-bottom{position: absolute; left:2cm; bottom:2cm}
+.text.pos-right-top{position: absolute; right:2cm; top:2cm}
+.text.pos-right-bottom{position: absolute; right:2cm; bottom:2cm}
 
 @page {
     size: A4 landscape;

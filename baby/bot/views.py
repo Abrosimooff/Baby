@@ -1,12 +1,17 @@
 import datetime
 import json
 import random
+from collections import defaultdict
+
 import hashids
+import pytz
 from django.urls import resolve
 from django.views.generic import TemplateView
 
 from bot.base import BaseLine, DEFAULT_KEYBOARD
+from bot.helpers import DateUtil
 from bot.models import UserVK, Baby, BabyUserVK, BabyHistory, BabyHistoryAttachment, AttachType, BabyHeight, BabyWeight
+from bot.utils.album import AlbumPager
 from bot.validators import ValidateGenderList, FirstNameValidate, ValidateYearList, ValidateMonthList, \
     ValidateBirthDate, HeightValidate, WeightValidate
 
@@ -294,11 +299,11 @@ class AddHistory(BaseLine):
         other_attach_exist = request.message.other_attach_exists
 
         # Если изменение сообщения, то удаляем сообщение и записываем новое
-        if self.history_action == 'edit':
-            delete_history = BabyHistory.objects.filter(message_vk_id=message_id).first()
-            if delete_history:
-                BabyHistoryAttachment.objects.filter(history=delete_history).delete()
-                delete_history.delete()
+        # if self.history_action == 'edit':
+        #     delete_history = BabyHistory.objects.filter(message_vk_id=message_id).first()
+        #     if delete_history:
+        #         BabyHistoryAttachment.objects.filter(history=delete_history).delete()
+        #         delete_history.delete()
 
         if message_text or photo_list:
             # записываем в историю ребёнка
@@ -319,7 +324,8 @@ class AddHistory(BaseLine):
                 for url in photo_list])
 
         if self.history_action == 'edit':
-            response_msg = 'Вы изменили сообщение - мы применили эти изменения в альбоме :)'
+            # response_msg = 'Вы изменили сообщение - мы применили эти изменения в альбоме :)'
+            response_msg = 'Временно мы не может принять изменения сообщений.'
         else:
             msg = ''
             if photo_list:
@@ -543,7 +549,11 @@ class StartLine(BaseLine):
 
 class AlbumPrint(TemplateView):
     """ Формируем альбом """
-    # template_name = 'bot/album1_landscape.html'
+    page_num = 1
+
+    def page_num_add(self):
+        self.page_num += 1
+        return ''
 
     def get_template_names(self):
         return 'bot/album{}_landscape.html'.format(self.kwargs['album_pk'])
@@ -552,7 +562,24 @@ class AlbumPrint(TemplateView):
         ctx = super().get_context_data(**kwargs)
         baby_id = kwargs['baby_pk']
         baby = Baby.objects.filter(pk=baby_id).first()
-        print(baby)
+
+        messages = BabyHistory.objects.select_related().prefetch_related('babyhistoryattachment_set').filter(baby=baby)
+        photo_dict = defaultdict(list)
+        for photo in BabyHistoryAttachment.objects.select_related().filter(history__baby=baby):
+            photo_dict[photo.history_id].append(photo.url)
+
+        today = datetime.date.today()
+        baby_history = DateUtil().month_history(today, baby.birth_date)
+        utc = pytz.UTC
+        for period in baby_history:
+            period['messages'] = list(filter(lambda x: utc.localize(period['start']) <= x.date_vk < utc.localize(period['end']), messages))
+            pager = AlbumPager()
+            for history in period['messages']:  # Ходим по всем истриям и фото и добавляем в пейджер
+                pager.add(history, photo_dict[history.id])
+            period['page_list'] = pager.page_list
+
         ctx['baby'] = baby
+        ctx['view'] = self
+        ctx['baby_history'] = baby_history
         return ctx
 

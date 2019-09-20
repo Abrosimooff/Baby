@@ -1,3 +1,5 @@
+import datetime
+
 from dateutil.relativedelta import relativedelta
 
 
@@ -6,6 +8,22 @@ class DateUtil:
     @staticmethod
     def delta(max_date, min_date):
         return relativedelta(max_date, min_date)
+
+    def month_history(self, max_date, birth_date):
+        """  Список названий месяцев/годов с ДР ребёнка до сегодняшнего момента"""
+        delta_list = []
+        day = birth_date
+        while day < max_date:
+            start = day
+            end = day + relativedelta(months=1)
+            delta_list.append(dict(
+                delta=self.delta(day, birth_date),
+                text=self.delta_string(day, birth_date),
+                start=datetime.datetime(start.year, start.month, start.day, 0, 0, 0),
+                end=datetime.datetime(end.year, end.month, end.day, 0, 0, 0),
+            ))
+            day = end
+        return delta_list
 
     def delta_string(self, max_date, min_date):
         delta=self.delta(max_date, min_date)

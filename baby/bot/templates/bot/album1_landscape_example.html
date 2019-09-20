@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Альбом</title>
+    <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/css/landscape.css">
+    <link href="https://fonts.googleapis.com/css?family=Caveat|Neucha&display=swap" rel="stylesheet">
+    <link href="/static/icons/css/iconpack_01.css" rel="stylesheet" />
+    <style>
+        .page{
+            background-image: url("/static/img/bg.jpg");
+        }
+        .page-num-center{
+            color:#fff; font-weight: bold; font-size: 0.6cm;text-shadow: 0px 0px 2px #333;
+        }
+        .photo{
+            border: 5px dashed #fff; border-radius: 100%;
+        }
+        .text{
+            font-family: 'Caveat', cursive; font-size: 0.7cm; color: #000;
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 0.5cm; border-radius: 0.5cm; max-width: 12cm;
+        }
+        .text.pos-left-bottom{border-radius: 0.5cm 0.5cm 0.5cm 0cm}
+        .text.pos-left-top{border-radius: 0cm 0.5cm 0.5cm 0.5cm}
+        .text.pos-right-top{border-radius: 0.5cm 0cm 0.5cm 0.5cm}
+        .text.pos-right-bottom{border-radius: 0.5cm 0.5cm 0cm 0.5cm}
+
+        .text.pos-left-bottom .date{position: absolute; font-size: 0.5cm; left: 0.5cm; bottom: -0.8cm; }
+        .text.pos-left-top .date{position: absolute; font-size: 0.5cm; left: 0.5cm; top: -0.8cm; }
+        .text.pos-right-top .date{position: absolute; font-size: 0.5cm; right: 0.5cm; top: -0.8cm; }
+        .text.pos-right-bottom .date{position: absolute; font-size: 0.5cm; right: 0.5cm; bottom: -0.8cm; }
+
+
+        .text p{margin: 0px;}
+        .month{
+            font-family: 'Neucha', cursive; font-size: 5cm; color: #ff619d; letter-spacing: 0.2cm;
+            position: absolute; top: 25%; left:25%;
+        }
+        .height{position: absolute; bottom: 15%; left: 35%; font-family: 'Neucha', cursive;}
+        .height .height-icon{font-size: 4cm; color: #ff619d; display: inline-block;}
+        .height .height-value{font-size: 1.5cm; color: #ff619d; display: inline-block; letter-spacing: 0.2cm}
+
+        .weight{position: absolute; bottom: 10%; right: 25%; font-family: 'Caveat', cursive;}
+        .weight .weight-icon{font-size: 5cm; color: #ff619d; display: block;}
+        .weight .weight-value{font-size: 1.5cm; color: #ff619d; display: block; vertical-align: text-bottom}
+
+
+        .caveat{font-family: 'Caveat', cursive;}
+        .neucha{font-family: 'Neucha', cursive;}
+        .home.subpage{
+            margin: 1cm; padding: 1cm;
+            height: 149mm;
+            border:0.2cm double #fff;
+        }
+        .home.subpage .data{
+            padding: 1.2cm;
+            background-color: rgba(255, 255, 255, 0.7);
+            width: 100%; height: 100%; text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="album">
+        <div class="page">
+            <div class="subpage home">
+                <div class="data">
+                    <div class="neucha" style="font-size: 1cm; color: #7c7c7c">29 апреля 2019 года</div>
+                    <div class="neucha" style="font-size: 1cm; color: #7c7c7c">наконец родилась</div>
+                    <div class="neucha" style="font-size: 1cm; color: #7c7c7c">наша</div>
+                    <div class="neucha" style="font-size: 3cm; color: #ff619d">Арина</div>
+                    <div class="neucha" style="font-size: 1cm; color: #7c7c7c">и</div>
+                    <div class="neucha" style="font-size: 1cm; color: #7c7c7c">это её </div>
+                    <div class="neucha" style="font-size: 1cm; color: #7c7c7c">Первый Альбом</div>
+                </div>
+            </div>
+        </div>
+        <div class="page">
+            <div class="subpage">
+                <img class="photo pos-right-bottom" src="/static/img/nophoto.png"></img>
+                <div class="text pos-right-top">
+                    <div class="date">14 мая 2019</div>
+                    <p>Круто встретили с роддома! Спасибо всем))) Очень красивые шарики!</p>
+                    <p>Лето было очень жарким, было тяжело, особенно беременной..</p>
+                </div>
+
+                <img class="photo pos-left-top" src="/static/img/nophoto.png"></img>
+                <div class="text pos-left-bottom">
+                    <div class="date">15 мая 2019</div>
+                    <p>Наконец-то мы дома. Можно отдохнуть. На фото - все наши родные :) Будем отдыхать
+                    </p>
+                </div>
+
+            </div>
+            <div class="page-num-center">1</div>
+        </div>
+        <div class="page">
+            <div class="subpage">
+                <div class="month"><b>1 месяц</b></div>
+                <div class="height">
+                    <div class="height-icon"><i class="icon-chart-bar-1"></i></div>
+                    <div class="height-value">52 см<br>4.2 кг</div>
+                </div>
+            </div>
+            <div class="page-num-center">2</div>
+        </div>
+        <div class="page">
+            <div class="subpage">
+                <img class="photo pos-right-top" src="/static/img/nophoto.png"></img>
+                <div class="text pos-left-top">
+                    <div class="date">1 июня 2019</div>
+                    <p>Уххуу! Мы кушаем, иногда плачем по ночам, даже часто!
+                        В общем, хотелсоь бы спать побольше, но никак нельзя</p>
+                </div>
+                <div class="text pos-right-bottom">
+                    <div class="date">7 июня 2019</div>
+                    <p>Куча пелёнок - наша доча очень успокаивается, когда её запеленаешь.</p>
+                </div>
+                <img class="photo pos-left-bottom" src="/static/img/nophoto.png"></img>
+            </div>
+            <div class="page-num-center">3</div>
+        </div>
+        <div class="page">
+            <div class="subpage">
+                <div class="text pos-left-top">
+                    <div class="date">23 июня 2019</div>
+                    <p>К нам приезжала тётя из Москвы, подарила подарки Арине.</p>
+                    <p>Очень хорошо помогала по дому, со стиркой, уборкой, и естественно с дочкой))</p>
+                    <p>Прям мечта. В трудную минуту помощь очень важна.</p>
+                    <p>Муж тоже очень хорошо помогает, но он не всегда дома.</p>
+                    <p>А вообще быть мамой - очень круто))</p>
+                    <p>Спасибо тёте Ирине и мужу за помощь!</p>
+                </div>
+                <div class="text pos-right-top">
+                    <div class="date">25 июня 2019</div>
+                    <p>Мы родились маленькими, поэтому тчательно следим за весом, кушаем, стараемся.</p>
+                    <p>Папа говорит, что мы наели щёчки, я этого не замечаю т.к. каждую минуту вместе с дочерью</p>
+                </div>
+                <div class="text pos-right-bottom">
+                    <div class="date">27 июня 2019</div>
+                    <p>Был выходной, и мой день рождения))))) Наконец, погуляли всей семьёй в парке</p>
+                    <p>Часа 3 гуляли, дочь восприняла хорошо, да и погода дала!</p>
+                    <p>Почаще бы такие выходы в свет, а то дома можно и уныть..</p>
+                </div>
+            </div>
+            <div class="page-num-center">4</div>
+        </div>
+        <div class="page">
+            <div class="subpage">
+                <img style="max-height: 12cm; max-width: 12cm" class="photo pos-left-top" src="/static/img/nophoto.png"></img>
+                <img style="max-height: 12cm; max-width: 12cm" class="photo pos-right-bottom" src="/static/img/nophoto.png"></img>
+            </div>
+            <div class="page-num-center">5</div>
+        </div>
+        <div class="page">
+            <div class="subpage">
+                <img style="max-height: 12cm; max-width: 12cm" class="photo pos-right-top" src="/static/img/nophoto.png"></img>
+                <img style="max-height: 12cm; max-width: 12cm" class="photo pos-left-bottom" src="/static/img/nophoto.png"></img>
+            </div>
+            <div class="page-num-center">6</div>
+        </div>
+    </div>
+</body>
+</html>

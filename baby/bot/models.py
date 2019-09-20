@@ -82,6 +82,9 @@ class BabyHistory(models.Model):
     date_vk = models.DateTimeField(verbose_name=u'Дата время сообщения')
     other_attach_vk = models.BooleanField(verbose_name=u'Есть ли другие вложения в сообщении кроме фото', default=False)
 
+    class Meta:
+        ordering = ('date_vk',)
+
 
 class AttachType(object):
     """ Виды вложений """
