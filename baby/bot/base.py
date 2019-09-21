@@ -18,6 +18,7 @@ from vk_api.longpoll import VkEventType, Event
 from vk_api import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 
+from bot.base_utils.keyboards import DEFAULT_KEYBOARD
 from bot.helpers import DateUtil
 from bot.messages import MONTH_MESSAGES
 from bot.models import AttachType, Baby, BabyHistory, UserVK
@@ -35,65 +36,6 @@ VK_SECRET_KEY = '08a48e9e691f4700b70ae37d09ddcbe7'
 # 5. Далее запускается View(BaseLine) где есть def bot_handler(self, bot_request, *args, **kwargs)
 
 
-DEFAULT_KEYBOARD = dict(
-    one_time=True,
-    buttons=[
-        [
-        dict(
-            action=dict(
-                type="text",
-                label=u'Ввести рост',
-                payload=dict(action='/height/0/')
-            ),
-            color="secondary"
-        ),
-        dict(
-            action=dict(
-                type="text",
-                label=u'Ввести вес',
-                payload=dict(action='/weight/0/')
-            ),
-            color="secondary"
-        ),
-    ],
-    [
-        dict(
-            action=dict(
-                type="text",
-                label=u'Настройки',
-                payload=dict(action='/settings/-1/')
-            ),
-            color="secondary"
-        ),
-        dict(
-            action=dict(
-                type="text",
-                label=u'Получить альбом',
-                payload=dict(action='/album')
-            ),
-            color="secondary"
-        )
-     ],
-    [
-        dict(
-            action=dict(
-                type="text",
-                label=u'Поделиться',
-                payload=dict(action='/sharing/')
-            ),
-            color="secondary"
-        ),
-        dict(
-            action=dict(
-                type="text",
-                label=u'Помощь',
-                payload=dict(action='/help/')
-            ),
-            color="secondary"
-        ),
-    ]
-    ]
- )
 
 
 class BotRequest(object):

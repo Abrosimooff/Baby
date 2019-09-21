@@ -14,10 +14,15 @@ class DateUtil:
         delta_list = []
         day = birth_date
         while day < max_date:
+            if self.delta(day, birth_date).days: # fix 29 февраля
+                day = day + relativedelta(days=1)
             start = day
             end = day + relativedelta(months=1)
+            delta = self.delta(day, birth_date)
+            month = (delta.years * 12) + delta.months
             delta_list.append(dict(
-                delta=self.delta(day, birth_date),
+                delta=delta,
+                month=month,
                 text=self.delta_string(day, birth_date),
                 start=datetime.datetime(start.year, start.month, start.day, 0, 0, 0),
                 end=datetime.datetime(end.year, end.month, end.day, 0, 0, 0),
