@@ -54,6 +54,8 @@ class Welcome(BaseLine):
                                                  )
 
         if not self.user_vk.baby:
+            self.user_vk.wait_payload = dict(action='/welcome')  # если чувак не нажмёт на кнопку, то будет /welcome
+            self.user_vk.save()
             request.vk_api.messages.send(
                 user_id=self.user_vk.user_vk_id,
                 keyboard=json.dumps(self.keyboard),
