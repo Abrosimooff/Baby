@@ -95,10 +95,25 @@ class MeasureView(BaseLine):
     field_name = ''
     validator_class = None
 
+    @cached_property
+    def keyboard(self):
+        return dict(
+            one_time=True,
+            buttons=[[dict(
+                action=dict(
+                    type="text",
+                    label='Отмена',
+                    payload=dict(action=reverse('exit'))
+                ),
+                color="secondary"
+            )]]
+        )
+
     def get_message(self):
         return ''
 
     def bot_handler(self, request, *args, **kwargs):
+        print(reverse('exit'))
         question_pk = kwargs.get('question_pk')
         # Пишем, что мол напишите цифру
         if question_pk == '0':
@@ -108,7 +123,7 @@ class MeasureView(BaseLine):
                 user_id=self.user_vk.user_vk_id,
                 message=self.get_message(),
                 random_id=random.randint(0, 10000000),
-                # keyboard=json.dumps(DEFAULT_KEYBOARD)
+                keyboard=json.dumps(self.keyboard)
             )
 
         # Разбироаем ответ
@@ -142,7 +157,7 @@ class MeasureView(BaseLine):
                     user_id=self.user_vk.user_vk_id,
                     message=validator_obj.error_message,
                     random_id=random.randint(0, 10000000),
-                    # keyboard=json.dumps(DEFAULT_KEYBOARD)
+                    keyboard=json.dumps(self.keyboard)
                 )
 
 
@@ -232,7 +247,7 @@ class SharingGetView(BaseLine):
         RESTART = dict(action='/sharing/get/')
 
         # Если нужно отправить первое сообщение, мол шлите код
-        if not self.user_vk.wait_payload:
+        if self.request.message.payload:
             self.send('Ок, присылайте код.', payload=RESTART)
         else:
             text = self.request.message.text
@@ -513,7 +528,7 @@ class SettingsLine(BaseLine):
     def next_message(self, next_question_pk):
         if len(self.question_list) == next_question_pk:  # Если все вопросы отвечены
 
-            is_first_start = self.user_vk.baby is None # Первый старт - если ребёнок ещё не создан
+            is_first_start = self.user_vk.baby is None  # Первый старт - если ребёнок ещё не создан
             # Сохраняем данные из всей линии вопросов
             self.save_cleaned_data()
             self.user_vk.wait_payload = None
@@ -669,7 +684,7 @@ class PastMonthsView(BaseLine):
                 action=dict(
                     type="text",
                     label='Отмена',
-                    payload=dict(action=reverse('past_exit'))
+                    payload=dict(action=reverse('exit'))
                 ),
                 color="secondary"
             ))
@@ -700,7 +715,7 @@ class PastMonthsView(BaseLine):
         )
 
 
-class PastMonthsExitView(BaseLine):
+class ExitView(BaseLine):
     """ выйти из режима заполнения "прошлого" """
 
     def bot_handler(self, request, *args, **kwargs):
@@ -734,7 +749,7 @@ class PastMonthsAddView(AddHistory):
                         action=dict(
                             type="text",
                             label=u'Выйти из заполнения "прошлого" ',
-                            payload=dict(action=reverse('past_exit'))
+                            payload=dict(action=reverse('exit'))
                         ),
                         color="secondary"
                     )

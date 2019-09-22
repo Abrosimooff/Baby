@@ -93,6 +93,10 @@ class Action(object):
                 if self.user_vk.wait_payload_dict.get('action'):
                     return self.user_vk.wait_payload_dict['action']
 
+            # Если после предыдущих шагов всё ещё нет ребёнка - редирект
+            if not self.user_vk.baby:
+                return '/welcome'
+
             # Если от пользователя ничего не ожидается, то следующее сообщение пойдёт в историю ребёнка
             return '/add_history'
 

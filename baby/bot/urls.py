@@ -3,7 +3,7 @@ from django.urls import path
 
 from bot.base import VkCallback
 from bot.views import SettingsLine, Welcome, AddHistory, AlbumView, EditHistory, HeightView, WeightView, SharingView, \
-    HelpView, SharingGetView, AlbumPrint, PastMonthsView, PastMonthsAddView, PastMonthsExitView
+    HelpView, SharingGetView, AlbumPrint, PastMonthsView, PastMonthsAddView, ExitView
 
 urlpatterns = [
     url(r'^welcome', Welcome.as_view()),
@@ -18,7 +18,8 @@ urlpatterns = [
     url(r'^help/', HelpView.as_view()),
     path('past/months/<int:keyboard>/', PastMonthsView.as_view(), name='past_month_list'),
     path('past/months/add/<int:month>/', PastMonthsAddView.as_view(), name='past_month_add'),
-    path('past/months/exit/', PastMonthsExitView.as_view(), name='past_exit'),
+
+    path('exit', ExitView.as_view(), name='exit'),  # Выход в режим обычного заполнения
 
     url(r'^vk/callback/', VkCallback.as_view()),
 
