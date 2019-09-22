@@ -585,7 +585,7 @@ class AlbumPrint(TemplateView):
         return ''
 
     def get_template_names(self):
-        return 'bot/album{}_landscape.html'.format(self.kwargs['album_pk'])
+        return 'bot/album{}_landscape.jinja2'.format(self.kwargs['album_pk'])
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -703,7 +703,7 @@ class PastMonthsExitView(BaseLine):
 
     def bot_handler(self, request, *args, **kwargs):
         super().bot_handler(request, *args, **kwargs)
-        self.user_vk.wait_payload = dict()
+        self.user_vk.wait_payload = None
         self.user_vk.save()
         self.request.vk_api.messages.send(
             user_id=self.user_vk.user_vk_id,

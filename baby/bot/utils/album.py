@@ -27,7 +27,7 @@ class AlbumPager(object):
         for index, photo in enumerate(photo_list):
             history_text = not index and history.text and len(
                 history.text) <= self.MAX_TITLE_CHARS and history.text or ''
-            self.object_list.append(Photo(photo, history.date_vk, history_text))
+            self.object_list.append(Photo(photo, history.date_vk if history.month is None else None, history_text))
 
     def chunks_text(self, text):
         result = []

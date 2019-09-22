@@ -114,13 +114,15 @@
                         {% for element in page %}
                             {% if element.object.is_photo %}
                                 <div class="photo-wrap {{ element.css_class_pos }}" style="background-image:url('{{ element.object.url }}'); background-size: cover; background-position: center center;"></div>
-                                <div class="title {{ element.css_class_pos }}">
-                                    <div>{{ element.object.date|date(('d E Y')) }}</div>
-                                    {{ element.object.title }}
-                                </div>
+                                {% if element.object.date or element.object.title %}
+                                    <div class="title {{ element.css_class_pos }}">
+                                        <div>{{ element.object.date|date(('d E Y')) }}</div>
+                                        {{ element.object.title }}
+                                    </div>
+                                {% endif %}
                             {% else %}
                                 <div class="text {{ element.css_class_pos }}">
-                                    <div class="date">{{ element.object.date_vk|date(('d E Y')) }}</div>
+                                    {% if element.object.month == None %}<div class="date">{{ element.object.date_vk|date(('d E Y')) }}</div>{% endif %}
                                     {{ element.object.text|linebreaksbr }}
                                 </div>
                             {% endif %}
