@@ -379,6 +379,12 @@ class Sender(object):
         print('date: {}, baby count: {}'.format(self.on_date, len(baby_list)))
         for baby in baby_list:
             month_count = self.month_count(baby.birth_date)
+            context = dict(first_name=baby.first_name.capitalize())
+            if baby.is_women:
+                context['baby_str'] = 'ваша малышка'
+                context['a'] = 'а'
+            else:
+                context['baby_str'] = 'ваш малыш'
             message = MONTH_MESSAGES.get(month_count)
             print(self.on_date, baby, month_count, message)
             if message:
@@ -387,7 +393,7 @@ class Sender(object):
                     user_vk.save()
                     VkHelp().vk_api.messages.send(
                         user_id=user_vk.user_vk_id,
-                        message=message,
+                        message=message.format(**context),
                         random_id=random.randint(0, 10000000),
                         keyboard=json.dumps(DEFAULT_KEYBOARD)
                     )
