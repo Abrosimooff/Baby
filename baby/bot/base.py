@@ -80,7 +80,7 @@ class Action(object):
 
         if self.is_message_new:
             # Если первый раз - стартуем
-            if not self.user_vk:
+            if not self.user_vk or not self.user_vk.baby:
                 return '/welcome'
 
             # Если нажали на кнопку
