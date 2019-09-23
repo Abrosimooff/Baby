@@ -5,7 +5,8 @@ from collections import defaultdict
 
 import hashids
 import pytz
-from django.urls import resolve
+from django.urls import resolve, reverse
+from django.utils.functional import cached_property
 from django.views.generic import TemplateView
 
 from bot.base import BaseLine, DEFAULT_KEYBOARD
@@ -46,9 +47,15 @@ class Welcome(BaseLine):
         super().bot_handler(request, *args, **kwargs)
         if not self.user_vk:
             # Отправляем первое сообщение
-            self.user_vk = UserVK.objects.create(user_vk_id=request.message.user_id)
+            user_data = request.vk_api.users.get(user_ids=request.message.user_id)
+            self.user_vk = UserVK.objects.create(user_vk_id=request.message.user_id,
+                                                 first_name=user_data[0]['first_name'],
+                                                 last_name=user_data[0]['last_name'],
+                                                 )
 
         if not self.user_vk.baby:
+            self.user_vk.wait_payload = dict(action='/welcome')  # если чувак не нажмёт на кнопку, то будет /welcome
+            self.user_vk.save()
             request.vk_api.messages.send(
                 user_id=self.user_vk.user_vk_id,
                 keyboard=json.dumps(self.keyboard),
@@ -88,10 +95,25 @@ class MeasureView(BaseLine):
     field_name = ''
     validator_class = None
 
+    @cached_property
+    def keyboard(self):
+        return dict(
+            one_time=True,
+            buttons=[[dict(
+                action=dict(
+                    type="text",
+                    label='Отмена',
+                    payload=dict(action=reverse('exit'))
+                ),
+                color="secondary"
+            )]]
+        )
+
     def get_message(self):
         return ''
 
     def bot_handler(self, request, *args, **kwargs):
+        print(reverse('exit'))
         question_pk = kwargs.get('question_pk')
         # Пишем, что мол напишите цифру
         if question_pk == '0':
@@ -101,7 +123,7 @@ class MeasureView(BaseLine):
                 user_id=self.user_vk.user_vk_id,
                 message=self.get_message(),
                 random_id=random.randint(0, 10000000),
-                # keyboard=json.dumps(DEFAULT_KEYBOARD)
+                keyboard=json.dumps(self.keyboard)
             )
 
         # Разбироаем ответ
@@ -135,7 +157,7 @@ class MeasureView(BaseLine):
                     user_id=self.user_vk.user_vk_id,
                     message=validator_obj.error_message,
                     random_id=random.randint(0, 10000000),
-                    # keyboard=json.dumps(DEFAULT_KEYBOARD)
+                    keyboard=json.dumps(self.keyboard)
                 )
 
 
@@ -225,7 +247,7 @@ class SharingGetView(BaseLine):
         RESTART = dict(action='/sharing/get/')
 
         # Если нужно отправить первое сообщение, мол шлите код
-        if not self.user_vk.wait_payload:
+        if self.request.message.payload:
             self.send('Ок, присылайте код.', payload=RESTART)
         else:
             text = self.request.message.text
@@ -282,6 +304,43 @@ class HelpView(BaseLine):
 class AddHistory(BaseLine):
     """ Добавление сообщения в историю ребёнка """
     history_action = 'add'
+    keyboard = DEFAULT_KEYBOARD
+
+    def get_month(self):
+        """ Получить номер месяца, в которое добавляется "прошлое" (для PastMonthsAddView) """
+        return None
+
+    def update_payload(self):
+        """ для PastMonthsAddView  """
+        pass
+
+    def create(self):
+        if self.message_text or self.photo_list:
+            # записываем в историю ребёнка
+            history = BabyHistory.objects.create(
+                baby=self.user_vk.baby,
+                text=self.message_text,
+                user_vk=self.user_vk,
+                message_vk_id=self.message_id,
+                date_vk=self.message_date,
+                month=self.get_month(),
+                other_attach_vk=self.other_attach_exist
+            )
+            # записываем вложения
+            if self.photo_list:
+                BabyHistoryAttachment.objects.bulk_create([BabyHistoryAttachment(
+                    history=history,
+                    attachment_type=AttachType.PHOTO,
+                    url=url)
+                for url in self.photo_list])
+
+    def delete(self):
+        pass
+        # delete_history = BabyHistory.objects.filter(message_vk_id=self.message_id).first()
+        # if delete_history:
+        #     BabyHistoryAttachment.objects.filter(history=delete_history).delete()
+        #     delete_history.delete()
+
 
     def bot_handler(self, request, *args, **kwargs):
 
@@ -290,60 +349,43 @@ class AddHistory(BaseLine):
         # 'important', 'random_id', 'attachments', 'is_hidden']
 
         message_dict = request.message.message['items'][0]
-        message_date = datetime.datetime.fromtimestamp(message_dict['date'])
-        message_id = request.message.id
-        message_text = request.message.text
-        photo_list = request.message.photo_list
-        if not photo_list:  # Если нет фоток, то собираем текст (вдруг есть перисланные сообщения)
-            message_text = request.message.all_text
-        other_attach_exist = request.message.other_attach_exists
+        self.message_date = datetime.datetime.fromtimestamp(message_dict['date'])
+        self.message_id = request.message.id
+        self.message_text = request.message.text
+        self.photo_list = request.message.photo_list
+        if not self.photo_list:  # Если нет фоток, то собираем текст (вдруг есть перисланные сообщения)
+            self.message_text = request.message.all_text
+        self.other_attach_exist = request.message.other_attach_exists
 
         # Если изменение сообщения, то удаляем сообщение и записываем новое
         # if self.history_action == 'edit':
-        #     delete_history = BabyHistory.objects.filter(message_vk_id=message_id).first()
-        #     if delete_history:
-        #         BabyHistoryAttachment.objects.filter(history=delete_history).delete()
-        #         delete_history.delete()
+        #     self.delete()
 
-        if message_text or photo_list:
-            # записываем в историю ребёнка
-            history = BabyHistory.objects.create(
-                baby=self.user_vk.baby,
-                text=message_text,
-                user_vk=self.user_vk,
-                message_vk_id=message_id,
-                date_vk=message_date,
-                other_attach_vk=other_attach_exist
-            )
-            # записываем вложения
-            if photo_list:
-                BabyHistoryAttachment.objects.bulk_create([BabyHistoryAttachment(
-                    history=history,
-                    attachment_type=AttachType.PHOTO,
-                    url=url)
-                for url in photo_list])
+        self.create()
+        self.update_payload()
+        self.request.vk_api.messages.send(
+            user_id=self.user_vk.user_vk_id,
+            message=self.get_response_msg(),
+            random_id=random.randint(0, 10000000),
+            keyboard=json.dumps(self.keyboard)
+        )
+        super().bot_handler(request, *args, **kwargs)
 
+    def get_response_msg(self):
         if self.history_action == 'edit':
             # response_msg = 'Вы изменили сообщение - мы применили эти изменения в альбоме :)'
             response_msg = 'Временно мы не может принять изменения сообщений.'
         else:
             msg = ''
-            if photo_list:
-                msg = u'Ок. Получил ваши фото ({}шт){}.'.format(len(photo_list), ' и описание' if message_text else '')
-            elif message_text:
+            if self.photo_list:
+                msg = u'Ок. Получил ваши фото ({}шт){}.'.format(len(self.photo_list), ' и описание' if self.message_text else '')
+            elif self.message_text:
                 msg = u'Ок. Информацию принял.'
 
-            if other_attach_exist:
+            if self.other_attach_exist:
                 msg += '\nИз вложений мы принимаем только фото!'
             response_msg = '{}\nЕсли есть что ещё - пиши :)'.format(msg)
-
-        self.request.vk_api.messages.send(
-            user_id=self.user_vk.user_vk_id,
-            message=response_msg,
-            random_id=random.randint(0, 10000000),
-            keyboard=json.dumps(DEFAULT_KEYBOARD)
-        )
-        super().bot_handler(request, *args, **kwargs)
+        return response_msg
 
 
 class EditHistory(AddHistory):
@@ -351,8 +393,8 @@ class EditHistory(AddHistory):
     history_action = 'edit'
 
 
-class StartLine(BaseLine):
-    """ Стартовая линия """
+class SettingsLine(BaseLine):
+    """ Стартовая линия - Настройки """
     month_list = [
         [(1, "Январь"), (2, "Февраль"), (3, "Март"),  (4, "Апрель")],
         [(5, "Май"), (6, "Июнь"), (7, "Июль"),  (8, "Август")],
@@ -486,7 +528,7 @@ class StartLine(BaseLine):
     def next_message(self, next_question_pk):
         if len(self.question_list) == next_question_pk:  # Если все вопросы отвечены
 
-            is_first_start = self.user_vk.baby is None # Первый старт - если ребёнок ещё не создан
+            is_first_start = self.user_vk.baby is None  # Первый старт - если ребёнок ещё не создан
             # Сохраняем данные из всей линии вопросов
             self.save_cleaned_data()
             self.user_vk.wait_payload = None
@@ -495,18 +537,26 @@ class StartLine(BaseLine):
             message = 'Настройки сохранены. Можете продолжать вести альбом :)'
             if is_first_start:
                 message = 'Спасибо. Теперь мы познакомились.\n'
+                delta = self.user_vk.baby.get_birth_date_delta()
+                delta_str = self.user_vk.baby.get_birth_date_delta_string()
                 if self.user_vk.baby.is_women:
-                    message += 'У вас малышка {} и ей сейчас {}.\n\n'.format(self.user_vk.baby.first_name,
-                                                                        self.user_vk.baby.get_birth_date_delta_string())
+                    message += 'У вас малышка {} и ей сейчас {}.'.format(self.user_vk.baby.first_name, delta_str)
                 else:
-                    message += 'У вас малыш {} и ему сейчас {}.\n\n'.format(self.user_vk.baby.first_name,
-                                                                        self.user_vk.baby.get_birth_date_delta_string())
-                welcome_text = 'Далее - просто присылайте фотографии, ' \
-                       'пишите сообщения, рассказывайте о новых эмоциях, реакциях, умениях, интересах ребёнка.\n' \
-                       'В общем, описывайте всё, что хотите увидеть в будущем альбоме вашего ребёнка :)\n' \
-                       'Это будет ваш мини-блог для наполнения альбома.\n' \
-                       'А я не буду назойливым, и лишь иногда буду напоминать, если вы давно ничем не делились :)'
+                    message += 'У вас малыш {} и ему сейчас {}.'.format(self.user_vk.baby.first_name, delta_str)
+                сontext = dict(first_name=self.user_vk.baby.first_name, a='а' if self.user_vk.baby.is_women else '')
+                welcome_text = \
+                    '\n\nСпасибо, что решили создать Альбом - когда {first_name} вырастет - он{a} точно оценит;)\n\n'\
+                    'Далее - просто присылайте фотографии,'\
+                    'пишите сообщения, рассказывайте о новых эмоциях, реакциях, умениях, интересах ребёнка.\n'\
+                    'В общем, описывайте всё, что хотите увидеть в будущем альбоме вашего ребёнка :)\n'\
+                    'Это будет ваш мини-блог для наполнения альбома.\n'\
+                    'А я не буду назойливым, и лишь иногда буду напоминать, если вы давно ничем не делились :)'\
+                        .format(**сontext)
 
+                # Если ребёнку сейчас 2 мес. или больше - предлагаем заполнить прошлое
+                if delta.years or (delta.months > 1):
+                    welcome_text += '\n\nP.S. Чтобы заполнить альбом за более ранние месяца, чем {} - ' \
+                               'нажмите "Добавить в прошлое" '.format(delta_str)
                 message += welcome_text
 
             # Отправляем сообщение что линия закончена
@@ -556,7 +606,7 @@ class AlbumPrint(TemplateView):
         return ''
 
     def get_template_names(self):
-        return 'bot/album{}_landscape.html'.format(self.kwargs['album_pk'])
+        return 'bot/album{}_landscape.jinja2'.format(self.kwargs['album_pk'])
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -572,9 +622,16 @@ class AlbumPrint(TemplateView):
         baby_history = DateUtil().month_history(today, baby.birth_date)
         utc = pytz.UTC
         for period in baby_history:
-            period['messages'] = list(filter(lambda x: utc.localize(period['start']) <= x.date_vk < utc.localize(period['end']), messages))
+            period_messages = []
+            for m in messages:
+                # сообщения, добавленные в прошлое (по месяцам)
+                if m.month is not None and m.month == period['month']:
+                    period_messages.append(m)
+                # сообщения, добавленные нормально
+                if m.month is None and utc.localize(period['start']) <= m.date_vk < utc.localize(period['end']):
+                    period_messages.append(m)
             pager = AlbumPager()
-            for history in period['messages']:  # Ходим по всем истриям и фото и добавляем в пейджер
+            for history in period_messages:  # Ходим по всем истриям и фото и добавляем в пейджер
                 pager.add(history, photo_dict[history.id])
             period['page_list'] = pager.page_list
 
@@ -582,4 +639,142 @@ class AlbumPrint(TemplateView):
         ctx['view'] = self
         ctx['baby_history'] = baby_history
         return ctx
+
+
+class PastMonthsView(BaseLine):
+    """ Показать список месяцев для заполнения прошлого """
+
+    def chunks(self, object_list, count):
+        result = []
+        for i in range(0, len(object_list), count):
+            result.append(object_list[i:i + count])
+        return result
+
+    @cached_property
+    def keyboard_list(self):
+        """ Cписок клавиатур с месяцами """
+        today = datetime.date.today()
+        baby_history = DateUtil().month_history(today, self.user_vk.baby.birth_date)
+        buttons = []
+        for btn in baby_history:
+            label = '{}{}'.format('%sг. '  % btn['delta'].years if btn['delta'].years else '',
+                                  '%sмес.' % btn['delta'].months if btn['delta'].months else '') or 'Первые дни'
+            month = (btn['delta'].years * 12) + btn['delta'].months
+            buttons.append(dict(
+                action=dict(
+                    type="text",
+                    label=label,
+                    payload=dict(action=reverse('past_month_add', args=[month]))
+                ),
+                color="secondary"
+            ))
+
+        keyboard_list = []
+        for btn_12 in self.chunks(buttons, 12):
+            keyboard_list.append(dict(one_time=True, buttons=self.chunks(btn_12, 4)))
+        # Добавление нижней панели МЛАДШЕ | ОТМЕНА | СТАРШЕ
+        for index, keyboard in enumerate(keyboard_list):
+            bottom_buttons = []
+            if index > 0:
+                bottom_buttons.append(dict(
+                    action=dict(
+                        type="text",
+                        label='Младше',
+                        payload=dict(action=reverse('past_month_list', args=[index-1]))
+                    ),
+                    color="secondary"
+                ))
+            bottom_buttons.append(dict(
+                action=dict(
+                    type="text",
+                    label='Отмена',
+                    payload=dict(action=reverse('exit'))
+                ),
+                color="secondary"
+            ))
+            if index + 1 < len(keyboard_list):
+                bottom_buttons.append(dict(
+                    action=dict(
+                        type="text",
+                        label='Старше',
+                        payload=dict(action=reverse('past_month_list', args=[index+1]))
+                    ),
+                    color="secondary"
+                ))
+            keyboard['buttons'].append(bottom_buttons)
+
+        return keyboard_list
+
+    def bot_handler(self, request, *args, **kwargs):
+        super().bot_handler(request, *args, **kwargs)
+        keyboard_index = int(kwargs.get('keyboard', 0))
+        keyboard = self.keyboard_list[keyboard_index]
+        self.user_vk.wait_payload = dict(action=reverse('past_month_list', args=[0]))
+        self.user_vk.save()
+        self.request.vk_api.messages.send(
+            user_id=self.user_vk.user_vk_id,
+            message=u'Выберите месяц, в который вы хотите добавить фотки/описание/текст',
+            random_id=random.randint(0, 10000000),
+            keyboard=json.dumps(keyboard)
+        )
+
+
+class ExitView(BaseLine):
+    """ выйти из режима заполнения "прошлого" """
+
+    def bot_handler(self, request, *args, **kwargs):
+        super().bot_handler(request, *args, **kwargs)
+        self.user_vk.wait_payload = None
+        self.user_vk.save()
+        self.request.vk_api.messages.send(
+            user_id=self.user_vk.user_vk_id,
+            message=u'Готово.\n'
+                    u'Можете дальше продолжать вести свой альбом в обычном режиме :)',
+            random_id=random.randint(0, 10000000),
+            keyboard=json.dumps(DEFAULT_KEYBOARD)
+        )
+
+
+class PastMonthsAddView(AddHistory):
+    """ Активировать выбранный месяц, если не активирован и принять фото, текст """
+
+    def get_month(self):
+        """ Номер месяца, куда добавляем фото """
+        month = self.kwargs.get('month')
+        if month is not None:
+            return int(month)
+
+    def update_payload(self):
+        self.keyboard = dict(
+            one_time=True,
+            buttons=[
+                [
+                    dict(
+                        action=dict(
+                            type="text",
+                            label=u'Выйти из заполнения "прошлого" ',
+                            payload=dict(action=reverse('exit'))
+                        ),
+                        color="secondary"
+                    )
+                ]
+            ]
+        )
+        # self.user_vk.wait_payload = dict(action='/past/months/add/{}/'.format(self.get_month()))
+        self.user_vk.wait_payload = dict(action=reverse('past_month_add', args=[self.get_month()]))
+        self.user_vk.save()
+
+    def bot_handler(self, request, *args, **kwargs):
+        if request.message.payload: # Если пришло сообщение, которое = нажатие на кнопку
+            self.update_payload()
+            self.request.vk_api.messages.send(
+                user_id=self.user_vk.user_vk_id,
+                message=u'Окей! Вы выбрали месяц, который будете наполнять :)\n'
+                        u'Сейчас присылайте фото/описание/текст.\n'
+                        u'А когда закончите наполнять месяц - нажмите "Выйти из заполнения прошлого". ',
+                random_id=random.randint(0, 10000000),
+                keyboard=json.dumps(self.keyboard)
+            )
+        else:
+            super().bot_handler(request, *args, **kwargs)
 

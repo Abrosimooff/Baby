@@ -88,6 +88,9 @@ class ValidateBirthDate(BaseValidate):
 class FirstNameValidate(BaseValidate):
 
     def is_valid(self):
+        if not self.value.strip():
+            self.error_message = u'Введите имя ребёнка.'
+            return False
         if len(self.value) <= 100:
             return True
         self.error_message = u'Слишком длинное имя.'

@@ -11,6 +11,8 @@ from bot.helpers import DateUtil
 
 class UserVK(models.Model):
     """ Информация о пользователе ВК """
+    first_name = models.CharField(max_length=200, verbose_name='Имя', blank=True)
+    last_name = models.CharField(max_length=200, verbose_name='Фамилия', blank=True)
     user_vk_id = models.IntegerField(verbose_name=u'ID пользователя ВК')
     wait_payload = JSONField(null=True, blank=True, verbose_name=u'Инфо об ожидаемом ответе')
 
@@ -80,6 +82,8 @@ class BabyHistory(models.Model):
     user_vk = models.ForeignKey(UserVK, on_delete=CASCADE, verbose_name=u'Автор заметки')
     message_vk_id = models.IntegerField(verbose_name=u'ID сообщения ВК')
     date_vk = models.DateTimeField(verbose_name=u'Дата время сообщения')
+    # если есть month - значит добавлено в прошлое и date_vk не учитывается
+    month = models.PositiveSmallIntegerField(verbose_name='В какой месяц ребёнка добавлено', null=True, blank=True)
     other_attach_vk = models.BooleanField(verbose_name=u'Есть ли другие вложения в сообщении кроме фото', default=False)
 
     class Meta:

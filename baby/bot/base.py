@@ -18,6 +18,7 @@ from vk_api.longpoll import VkEventType, Event
 from vk_api import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 
+from bot.base_utils.keyboards import DEFAULT_KEYBOARD
 from bot.helpers import DateUtil
 from bot.messages import MONTH_MESSAGES
 from bot.models import AttachType, Baby, BabyHistory, UserVK
@@ -35,65 +36,6 @@ VK_SECRET_KEY = '08a48e9e691f4700b70ae37d09ddcbe7'
 # 5. Далее запускается View(BaseLine) где есть def bot_handler(self, bot_request, *args, **kwargs)
 
 
-DEFAULT_KEYBOARD = dict(
-    one_time=True,
-    buttons=[
-        [
-        dict(
-            action=dict(
-                type="text",
-                label=u'Ввести рост',
-                payload=dict(action='/height/0/')
-            ),
-            color="secondary"
-        ),
-        dict(
-            action=dict(
-                type="text",
-                label=u'Ввести вес',
-                payload=dict(action='/weight/0/')
-            ),
-            color="secondary"
-        ),
-    ],
-    [
-        dict(
-            action=dict(
-                type="text",
-                label=u'Настройки',
-                payload=dict(action='/settings/-1/')
-            ),
-            color="secondary"
-        ),
-        dict(
-            action=dict(
-                type="text",
-                label=u'Получить альбом',
-                payload=dict(action='/album')
-            ),
-            color="secondary"
-        )
-     ],
-    [
-        dict(
-            action=dict(
-                type="text",
-                label=u'Поделиться',
-                payload=dict(action='/sharing/')
-            ),
-            color="secondary"
-        ),
-        dict(
-            action=dict(
-                type="text",
-                label=u'Помощь',
-                payload=dict(action='/help/')
-            ),
-            color="secondary"
-        ),
-    ]
-    ]
- )
 
 
 class BotRequest(object):
@@ -150,6 +92,10 @@ class Action(object):
             elif self.user_vk.wait_payload_dict:
                 if self.user_vk.wait_payload_dict.get('action'):
                     return self.user_vk.wait_payload_dict['action']
+
+            # Если после предыдущих шагов всё ещё нет ребёнка - редирект
+            if not self.user_vk.baby:
+                return '/welcome'
 
             # Если от пользователя ничего не ожидается, то следующее сообщение пойдёт в историю ребёнка
             return '/add_history'
@@ -433,6 +379,12 @@ class Sender(object):
         print('date: {}, baby count: {}'.format(self.on_date, len(baby_list)))
         for baby in baby_list:
             month_count = self.month_count(baby.birth_date)
+            context = dict(first_name=baby.first_name.capitalize())
+            if baby.is_women:
+                context['baby_str'] = 'ваша малышка'
+                context['a'] = 'а'
+            else:
+                context['baby_str'] = 'ваш малыш'
             message = MONTH_MESSAGES.get(month_count)
             print(self.on_date, baby, month_count, message)
             if message:
@@ -441,7 +393,7 @@ class Sender(object):
                     user_vk.save()
                     VkHelp().vk_api.messages.send(
                         user_id=user_vk.user_vk_id,
-                        message=message,
+                        message=message.format(**context),
                         random_id=random.randint(0, 10000000),
                         keyboard=json.dumps(DEFAULT_KEYBOARD)
                     )
