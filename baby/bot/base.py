@@ -27,6 +27,7 @@ VK_KEY = '2a41e2391b546114ebaf498df8b9fbf46d2fc8aae209200d038f80ca133f19f214b701
 
 VK_GROUP_ID = 186300624
 VK_SECRET_KEY = '08a48e9e691f4700b70ae37d09ddcbe7'
+VICTOR_USER = 198163426
 
 # Процесс работы:
 # 1. Команда vk_bot
@@ -50,11 +51,13 @@ class BotRequest(object):
         self.vk_api = vk_api
 
 
-class Action(object):
+class LongPollAction(object):
     """ Класс (для LongPollAPI) принимает bot_request и перенаправляет на конкретный action """
     bot_request = None
     action = None
     event = None
+    is_longpoll = True
+    is_callback = False
 
     def __init__(self, event, bot_request):
         self.event = event
@@ -77,6 +80,10 @@ class Action(object):
         return self.event.type == VkEventType.MESSAGE_EDIT and self.event.from_user
 
     def get_action(self):
+
+        # LongPoll доступен только для VICTOR_USER чтобы тестировать
+        if self.is_longpoll and self.bot_request.message.user_id != VICTOR_USER:
+            return
 
         # Если это сообщение от сообщества
         if self.bot_request.message.user_id < 0:
@@ -129,8 +136,10 @@ class Action(object):
                 )
 
 
-class CallbackAction(Action):
+class CallbackAction(LongPollAction):
     """ Класс (для CallbackAPI) принимает bot_request и перенаправляет на конкретный action """
+    is_longpoll = False
+    is_callback = True
 
     @property
     def is_message_new(self):
@@ -344,7 +353,7 @@ class VkHelp(object):
                 if event.message_id:
                     _message = Message(event.message_id, self.vk_api)
                     bot_request = BotRequest(message=_message, event=event, vk_api=self.vk_api)
-                    Action(event, bot_request).run_action()
+                    LongPollAction(event, bot_request).run_action()
             # except (ConnectionResetError, urllib3.exceptions.ProtocolError, requests.exceptions.ConnectionError) \
             except Exception as request_error:
                 print('{}: Request Exception: {}'.format(datetime.datetime.now(), request_error))
