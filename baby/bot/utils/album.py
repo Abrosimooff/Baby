@@ -13,6 +13,7 @@ class AlbumPager(object):
 
         if history.text and len(history.text) > self.MAX_TITLE_CHARS:
             if len(history.text) <= self.CHUNK_TEXT_CHARS:
+                history.is_text = True
                 self.object_list.append(history)
             else:
                 text_parts = self.chunks_text(history.text)
@@ -22,6 +23,7 @@ class AlbumPager(object):
                             self.text = text
                             self.date_vk = date_vk
                             self.month = None
+                            self.is_text = True
                             if num < len(text_parts):
                                 self.text += ' ...'
 
@@ -40,8 +42,16 @@ class AlbumPager(object):
     def chunks_text(self, text):
         result = []
         count = self.CHUNK_TEXT_CHARS
+        pos_space = 0  # Позиция первого пробела после конца делимой строки (делим на моменте пробела)
         for i in range(0, len(text), count):
-            result.append(text[i:i + count])
+            start = i + pos_space
+            pos_space = text[start + count:].find(' ')
+            if pos_space == -1:
+                pos_space = len(text)
+                result.append(text[start:pos_space])
+                break
+            result.append(text[start:i+count+pos_space])
+
         return result
 
     def chunks_pages(self, object_list, count):
