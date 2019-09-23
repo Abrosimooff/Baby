@@ -3,7 +3,7 @@ import datetime
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
-from bot.models import Baby
+from bot.models import Baby, BabyHeight, BabyWeight
 
 
 class BaseValidate(object):
@@ -118,6 +118,14 @@ class HeightValidate(BaseValidate):
             self.error_message = u'Слишком большое значение - возможно вы ошиблись.\n' \
                                  u'Ещё раз напишите рост в сантиметрах'
             return False
+
+        last_measure = BabyHeight.objects.filter(baby=self.cleaned_data['baby']).order_by('date').last()
+        if last_measure and last_measure.height == val:
+            self.error_message = u'В предыдущий раз вы уже передавали такой рост!\n' \
+                                 u'Подрастите ещё хоть на сантиметрик, тогда отметим)'
+            return False
+
+        self.value = val
         return True
 
 
@@ -140,4 +148,11 @@ class WeightValidate(BaseValidate):
         if val > 50000:
             self.error_message = u'Слишком большое значение - возможно вы ошиблись.\nЕщё раз напишите вес в граммах'
             return False
+
+        last_measure = BabyWeight.objects.filter(baby=self.cleaned_data['baby']).order_by('date').last()
+        if last_measure and last_measure.weight == val:
+            self.error_message = u'В предыдущий раз вы уже передавали такой вес!\n' \
+                                 u'Подрастите ещё хоть на пару грамм, тогда отметим)'
+            return False
+        self.value = val
         return True

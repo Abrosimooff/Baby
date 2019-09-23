@@ -111,6 +111,18 @@ class BabyHeight(models.Model):
     class Meta:
         unique_together = ['baby', 'date']
 
+    def __str__(self):
+        return self.height_str
+
+    @cached_property
+    def height_str(self):
+        return self.cm_to_str(self.height)
+
+    @staticmethod
+    def cm_to_str(cm):
+        m, cm = divmod(cm, 100)
+        return '{}{}'.format('%sм. ' % m if m else '', '%sсм.' % cm if cm else '')
+
 
 class BabyWeight(models.Model):
     """ Вес ребёнка """
@@ -120,3 +132,15 @@ class BabyWeight(models.Model):
 
     class Meta:
         unique_together = ['baby', 'date']
+
+    def __str__(self):
+        return self.weight_str
+
+    @cached_property
+    def weight_str(self):
+        return self.gramm_to_str(self.weight)
+
+    @staticmethod
+    def gramm_to_str(gramm):
+        m, gm = divmod(gramm, 1000)
+        return '{}{}'.format('%sкг. ' % m if m else '', '%sг.' % gm if gm else '')

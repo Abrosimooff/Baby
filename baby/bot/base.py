@@ -78,6 +78,10 @@ class Action(object):
 
     def get_action(self):
 
+        # Если это сообщение от сообщества
+        if self.bot_request.message.user_id < 0:
+            return
+
         if self.is_message_new:
             # Если первый раз - стартуем
             if not self.user_vk:
@@ -104,8 +108,9 @@ class Action(object):
             return '/edit_history'
 
     def run_action(self):
-        print('{}: user_vk: {}, action: {}'.format(datetime.datetime.now(), self.bot_request.message.user_id, self.action))
         if self.action:
+            print('{}: user_vk: {}, action: {}'.format(datetime.datetime.now(), self.bot_request.message.user_id,
+                                                       self.action))
             try:
                 if self.action[0] != '/':
                     self.action = '/' + self.action
@@ -240,7 +245,7 @@ class Message(object):
     def __init__(self, message_id, vk_api):
         self.vk_api = vk_api
         self.message = self.vk_api.messages.getById(message_ids=message_id)
-        print('MESSAGE:', self.item)
+        # print('MESSAGE:', self.item)
 
 
     @cached_property

@@ -2,7 +2,7 @@
 class AlbumPager(object):
     object_list = []  # Все элементы альбома по очереди (т.е элементы одного месяца)
     css_classes = ['pos-left-top', 'pos-right-top', 'pos-left-bottom', 'pos-right-bottom', ]
-    CHUNK_TEXT_CHARS = 250
+    CHUNK_TEXT_CHARS = 200
     MAX_TITLE_CHARS = 50
 
     def __init__(self) -> None:
@@ -16,11 +16,14 @@ class AlbumPager(object):
                 self.object_list.append(history)
             else:
                 text_parts = self.chunks_text(history.text)
-                for text in text_parts:
+                for num, text in enumerate(text_parts, 1):
                     class PartHistory:
                         def __init__(self, text, date_vk):
                             self.text = text
                             self.date_vk = date_vk
+                            self.month = None
+                            if num < len(text_parts):
+                                self.text += ' ...'
 
                     self.object_list.append(PartHistory(text, history.date_vk))
 
@@ -28,6 +31,11 @@ class AlbumPager(object):
             history_text = not index and history.text and len(
                 history.text) <= self.MAX_TITLE_CHARS and history.text or ''
             self.object_list.append(Photo(photo, history.date_vk if history.month is None else None, history_text))
+
+    def add_measure(self, measure_list):
+        """Добавить измерения Рост/Вес"""
+        self.object_list.extend(measure_list)
+
 
     def chunks_text(self, text):
         result = []

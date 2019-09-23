@@ -125,7 +125,8 @@
                                         {{ element.object.title }}
                                     </div>
                                 {% endif %}
-                            {% else %}
+                            {% endif %}
+                            {% if element.object.message_vk_id %}
                                 <div class="text {{ element.css_class_pos }}">
                                     {% if element.object.month == None %}<div class="date">{{ element.object.date_vk|date(('d E Y')) }}</div>{% endif %}
                                     {{ element.object.text|linebreaksbr }}

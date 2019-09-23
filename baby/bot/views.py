@@ -112,8 +112,11 @@ class MeasureView(BaseLine):
     def get_message(self):
         return ''
 
+    def finish_message(self):
+        return 'Готово. Спасибо, что передали показания!)\n'\
+               'Можете продолжать вести альбом :)'
+
     def bot_handler(self, request, *args, **kwargs):
-        print(reverse('exit'))
         question_pk = kwargs.get('question_pk')
         # Пишем, что мол напишите цифру
         if question_pk == '0':
@@ -129,14 +132,15 @@ class MeasureView(BaseLine):
         # Разбироаем ответ
         elif question_pk == '1':
             answer = self.request.message.text
-            validator_obj = self.validator_class(answer)
+            validator_obj = self.validator_class(answer, cleaned_data=dict(baby=self.user_vk.baby))
             if validator_obj.is_valid():
-                measure = self.model.objects.filter(baby=self.user_vk.baby, date=datetime.date.today()).first()
-                if measure:
-                    setattr(measure, self.field_name, validator_obj.value)
-                    measure.save()
+                self.last_measure = self.model.objects.filter(baby=self.user_vk.baby).order_by('date').last()
+                self.new_measure = self.model.objects.filter(baby=self.user_vk.baby, date=datetime.date.today()).first()
+                if self.new_measure:
+                    setattr(self.new_measure, self.field_name, validator_obj.value)
+                    self.new_measure.save()
                 else:
-                    measure = self.model.objects.create(
+                    self.new_measure = self.model.objects.create(
                         baby=self.user_vk.baby, date=datetime.date.today(), **{self.field_name: validator_obj.value})
 
                 # Отвечаем, что приняли показания
@@ -144,8 +148,7 @@ class MeasureView(BaseLine):
                 self.user_vk.save()
                 self.request.vk_api.messages.send(
                     user_id=self.user_vk.user_vk_id,
-                    message='Готово. Спасибо, что передали показания!)\n'
-                            'Можете продолжать вести альбом :)',
+                    message=self.finish_message(),
                     random_id=random.randint(0, 10000000),
                     keyboard=json.dumps(DEFAULT_KEYBOARD)
                 )
@@ -171,6 +174,21 @@ class HeightView(MeasureView):
         gstr = 'доросла' if self.user_vk.baby.is_women else 'дорос'
         return 'Напишите до скольки сантиметров уже {} {}?'.format(gstr, self.user_vk.baby.first_name.capitalize())
 
+    def finish_message(self):
+        ctx = dict(first_name=self.user_vk.baby.first_name,
+                   la='ла' if self.user_vk.baby.is_women else '',
+                   measure_str=self.new_measure.height_str)
+        if self.last_measure:
+            delta = self.new_measure.height - self.last_measure.height
+            ctx['days'] = (self.new_measure.date - self.last_measure.date).days
+            ctx['cm'] = self.model.cm_to_str(delta)
+            return 'Готово. Значит вы уже {measure_str} За {days}дн. {first_name} подрос{la} на {cm}\n' \
+                   'Спасибо, что передали показания!)\n' \
+                   'Можете продолжать вести альбом :)'.format(**ctx)
+        return 'Готово. Ваши первые показания роста ({measure_str}) приняты!\n' \
+               'Спасибо, не забывайте периодически сообщать о новых сантиметрах)\n' \
+               'А сейчас можете продолжать вести альбом :)'.format(**ctx)
+
 
 class WeightView(MeasureView):
     """ Заполнить вес """
@@ -180,6 +198,20 @@ class WeightView(MeasureView):
 
     def get_message(self):
         return 'Напишите cколько граммов уже весит {}?'.format(self.user_vk.baby.first_name.capitalize())
+
+    def finish_message(self):
+        ctx = dict(first_name=self.user_vk.baby.first_name,
+                   la='ла' if self.user_vk.baby.is_women else '',
+                   measure_str=self.new_measure.weight_str)
+        if self.last_measure:
+            delta = self.new_measure.weight - self.last_measure.weight
+            ctx['days'] = (self.new_measure.date - self.last_measure.date).days
+            ctx['g'] = self.model.gramm_to_str(delta)
+            return 'Готово. Значит вы уже {measure_str} За {days}дн. {first_name} подрос{la} на {g} Спасибо, что передали показания!)\n' \
+                   'Можете продолжать вести альбом :)'.format(**ctx)
+        return 'Готово. Ваши первые показания веса({measure_str}) приняты!\n' \
+               'Спасибо, не забывайте периодически сообщать о новых граммах)\n' \
+               'А сейчас можете продолжать вести альбом :)'.format(**ctx)
 
 
 class SharingView(BaseLine):
@@ -543,20 +575,19 @@ class SettingsLine(BaseLine):
                     message += 'У вас малышка {} и ей сейчас {}.'.format(self.user_vk.baby.first_name, delta_str)
                 else:
                     message += 'У вас малыш {} и ему сейчас {}.'.format(self.user_vk.baby.first_name, delta_str)
-                сontext = dict(first_name=self.user_vk.baby.first_name, a='а' if self.user_vk.baby.is_women else '')
+                context = dict(first_name=self.user_vk.baby.first_name, a='а' if self.user_vk.baby.is_women else '')
                 welcome_text = \
                     '\n\nСпасибо, что решили создать Альбом - когда {first_name} вырастет - он{a} точно оценит;)\n\n'\
-                    'Далее - просто присылайте фотографии,'\
+                    'Далее -  уделите время раз в неделю/месяц и присылайте фотографии,'\
                     'пишите сообщения, рассказывайте о новых эмоциях, реакциях, умениях, интересах ребёнка.\n'\
                     'В общем, описывайте всё, что хотите увидеть в будущем альбоме вашего ребёнка :)\n'\
-                    'Это будет ваш мини-блог для наполнения альбома.\n'\
-                    'А я не буду назойливым, и лишь иногда буду напоминать, если вы давно ничем не делились :)'\
-                        .format(**сontext)
+                    'Это будет ваш мини-блог для наполнения альбома.\n' \
+                    'А я не буду назойливым, и лишь иногда буду напоминать, если вы давно ничем не делились :)'.format(**context)
 
                 # Если ребёнку сейчас 2 мес. или больше - предлагаем заполнить прошлое
                 if delta.years or (delta.months > 1):
-                    welcome_text += '\n\nP.S. Чтобы заполнить альбом за более ранние месяца, чем {} - ' \
-                               'нажмите "Добавить в прошлое" '.format(delta_str)
+                    welcome_text += '\n\nP.S. Предлагаю немного заполнить альбом за более ранние месяца.\n' \
+                               'Чтобы это сделать - нажмите "Добавить в прошлое" '.format(delta_str)
                 message += welcome_text
 
             # Отправляем сообщение что линия закончена
@@ -613,16 +644,25 @@ class AlbumPrint(TemplateView):
         baby_id = kwargs['baby_pk']
         baby = Baby.objects.filter(pk=baby_id).first()
 
-        messages = BabyHistory.objects.select_related().prefetch_related('babyhistoryattachment_set').filter(baby=baby)
+        messages = BabyHistory.objects.select_related().filter(baby=baby)
         photo_dict = defaultdict(list)
         for photo in BabyHistoryAttachment.objects.select_related().filter(history__baby=baby):
             photo_dict[photo.history_id].append(photo.url)
+
+        # Измерения
+
+        measure_dict = defaultdict(list)
+        for object in BabyHeight.objects.filter(baby=baby).order_by('date'):
+            measure_dict[object.date].append(object)
+        for object in BabyWeight.objects.filter(baby=baby).order_by('date'):
+            measure_dict[object.date].append(object)
 
         today = datetime.date.today()
         baby_history = DateUtil().month_history(today, baby.birth_date)
         utc = pytz.UTC
         for period in baby_history:
             period_messages = []
+            measure_dates_in_period = []
             for m in messages:
                 # сообщения, добавленные в прошлое (по месяцам)
                 if m.month is not None and m.month == period['month']:
@@ -630,9 +670,21 @@ class AlbumPrint(TemplateView):
                 # сообщения, добавленные нормально
                 if m.month is None and utc.localize(period['start']) <= m.date_vk < utc.localize(period['end']):
                     period_messages.append(m)
+                for date in measure_dict.keys():
+                    if period['start'].date() <= date < period['end'].date():
+                        measure_dates_in_period.append(date)
             pager = AlbumPager()
             for history in period_messages:  # Ходим по всем истриям и фото и добавляем в пейджер
+                for date in sorted(measure_dates_in_period):
+                    if date <= history.date_vk.date():
+                        if measure_dict.get(date):
+                            pager.add_measure(measure_dict.pop(date))  # Добавляем в альбом и удаляем из словаря
                 pager.add(history, photo_dict[history.id])
+
+            # оставшиеся измерения  (если есть) вставляем в конец
+            for date in sorted(measure_dates_in_period):
+                if measure_dict.get(date):
+                    pager.add_measure(measure_dict.pop(date))
             period['page_list'] = pager.page_list
 
         ctx['baby'] = baby
