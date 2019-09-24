@@ -2,3 +2,10 @@
 .page-num-center{ position: absolute; left: 50%; bottom: 0.8cm;}
 .page-num-left{ position: absolute; left: 3cm; bottom: 0.8cm;}
 .page-num-right{ position: absolute; right: 3cm; bottom: 0.8cm;}
+
+
+.group-text{
+    color:#8acef5;
+    background-color: #e4eff3;
+    /*font-family: 'Adigiana Extreme';*/
+}
