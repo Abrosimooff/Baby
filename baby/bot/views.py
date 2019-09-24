@@ -1,3 +1,4 @@
+import copy
 import datetime
 import json
 import random
@@ -105,7 +106,7 @@ class MeasureView(BaseLine):
                     label='Отмена',
                     payload=dict(action=reverse('exit'))
                 ),
-                color="secondary"
+                color="negative"
             )]]
         )
 
@@ -259,7 +260,7 @@ class SharingGetView(BaseLine):
                         label=u'Отмена',
                         payload=dict(action='/welcome')
                     ),
-                    color="secondary"
+                    color="negative"
                 ),
             ]
         ])
@@ -484,7 +485,17 @@ class SettingsLine(BaseLine):
          ),
          },
         {'message': u'Напишите какого числа родился малыш :)', 'field_name': 'day', 'validator': ValidateBirthDate},
-    ]    
+    ]
+
+    @cached_property
+    def cancel_button(self):
+        return dict(
+            action=dict(
+                type="text",
+                label=u'Отмена',
+                payload=dict(action=reverse('exit'))),
+            color="negative"
+        )
 
     def bot_handler(self, request, *args, **kwargs):
         question_pk = kwargs.get('question_pk')
@@ -606,12 +617,20 @@ class SettingsLine(BaseLine):
             self.user_vk.wait_payload = user_payload
             self.user_vk.save()
 
+            # Если ребёнок уже создан, то можно дать кнопку - выйти из настроек
+            keyboard = copy.deepcopy(next_question.get('keyboard', {}))
+            if self.user_vk.baby:
+                if keyboard:
+                    keyboard['buttons'].append([self.cancel_button])
+                else:
+                    keyboard = dict(one_time=True, buttons=[[self.cancel_button]])
+
             # Отправляем след сообщение из линии настроек
             self.request.vk_api.messages.send(
                 user_id=self.user_vk.user_vk_id,
                 message=u'Ок. %s' % next_question['message'],
                 random_id=random.randint(0, 10000000),
-                keyboard=json.dumps(next_question.get('keyboard', {}))
+                keyboard=json.dumps(keyboard)
             )
 
     def save_cleaned_data(self):
@@ -742,7 +761,7 @@ class PastMonthsView(BaseLine):
                     label='Отмена',
                     payload=dict(action=reverse('exit'))
                 ),
-                color="secondary"
+                color="negative"
             ))
             if index + 1 < len(keyboard_list):
                 bottom_buttons.append(dict(
