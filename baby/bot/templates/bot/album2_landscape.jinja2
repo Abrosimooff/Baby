@@ -1,12 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Альбом</title>
-    <link rel="stylesheet" href="/static/css/base.css">
-    <link rel="stylesheet" href="/static/css/landscape.css">
-    <link href="https://fonts.googleapis.com/css?family=Caveat|Neucha&display=swap" rel="stylesheet">
-    <link href="/static/icons/css/iconpack_01.css" rel="stylesheet" />
+{% extends 'bot/_base_album_landscape.jinja2' %}
+
+{% block css %}
     <style>
         .page{
             background-image: url("/static/img/bg2.jpg");
@@ -16,9 +10,6 @@
         .page:nth-child(2n){background-position: bottom}
         .page-num-center{
             color:#fff; font-weight: bold; font-size: 0.6cm;text-shadow: 0px 0px 2px #333;
-        }
-        .photo{
-
         }
         .photo-wrap{
             overflow: hidden;
@@ -50,7 +41,6 @@
         .title.pos-right-top{position: absolute; font-size: 0.5cm; right: 10.5cm; top: 5cm;  border-radius: 0.5cm 0cm 0.5cm 0.5cm; }
         .title.pos-right-bottom{position: absolute; font-size: 0.5cm; right: 10.5cm; bottom: 5cm; border-radius: 0.5cm 0.5cm 0cm 0.5cm;}
 
-
         .text p{margin: 0px;}
         .month{
             font-family: 'Neucha', cursive; font-size: 4.5cm; letter-spacing: 0.2cm;
@@ -62,13 +52,7 @@
         .men .home.subpage{border:1cm dashed #5ec7ca;}
 
         .month b {background: rgba(255, 255, 255, 0.9); padding: 0.5cm; border: 0.2cm dashed}
-        .height{position: absolute; bottom: 15%; left: 35%; font-family: 'Neucha', cursive;}
-        .height .height-icon{font-size: 4cm; display: inline-block;}
-        .height .height-value{font-size: 1.5cm; display: inline-block; letter-spacing: 0.2cm}
-
-        .weight{position: absolute; bottom: 10%; right: 25%; font-family: 'Caveat', cursive;}
-        .weight .weight-icon{font-size: 5cm; display: block;}
-        .weight .weight-value{font-size: 1.5cm; display: block; vertical-align: text-bottom}
+        .height, .weight{background-color: rgba(255, 255, 255, 0.9); padding: 0.5cm; border: 0.5cm dashed #fef8ea;}
 
         .caveat{font-family: 'Caveat', cursive;}
         .neucha{font-family: 'Neucha', cursive;}
@@ -83,65 +67,4 @@
         }
 
     </style>
-</head>
-<body>
-    <div class="album {% if baby.is_women %}women{% else %}men{% endif %}">
-        <div class="page">
-            <div class="subpage home">
-                <div class="data">
-                    <div class="neucha" style="font-size: 1cm; color: #7c7c7c">{{ baby.birth_date|date('d E Y') }} года</div>
-                    <div class="neucha" style="font-size: 1cm; color: #7c7c7c">наконец {% if baby.is_women %}родилась{% else %}родился{% endif %}</div>
-                    <div class="neucha" style="font-size: 1cm; color: #7c7c7c">наш{% if baby.is_women %}а{% endif %}</div>
-                    <div class="neucha color" style="font-size: 3cm;">{{ baby.first_name }}</div>
-                    <div class="neucha" style="font-size: 1cm; color: #7c7c7c">и</div>
-                    <div class="neucha" style="font-size: 1cm; color: #7c7c7c">это {% if baby.is_women %}её{% else %}его{% endif %}</div>
-                    <div class="neucha" style="font-size: 1cm; color: #7c7c7c">Первый Альбом</div>
-                </div>
-            </div>
-        </div>
-
-        {% for h in baby_history %}
-            {% if h.page_list %}
-                <div class="page">
-                    <div class="subpage">
-                        <div class="month"><b>{% if h.delta.years or h.delta.months %}{{ h.text }}{% else %}Первые дни{% endif %}</b></div>
-{#                        <div class="height">#}
-{#                            <div class="height-icon"><i class="icon-chart-bar-1"></i></div>#}
-{#                            <div class="height-value">52 см<br>4.2 кг</div>#}
-{#                        </div>#}
-                    </div>
-                    <div class="page-num-center">{{ view.page_num }}</div>
-                    {{ view.page_num_add() }}
-                </div>
-                {% for page in h.page_list %}
-                    <div class="page">
-                        <div class="subpage">
-                        {% for element in page %}
-                            {% if element.object.is_photo %}
-                                <div class="photo-wrap {{ element.css_class_pos }}" style="background-image:url('{{ element.object.url }}'); background-size: cover; background-position: center center;"></div>
-                                {% if element.object.date or element.object.title %}
-                                    <div class="title {{ element.css_class_pos }}">
-                                        <div>{{ element.object.date|date(('d E Y')) }}</div>
-                                        {{ element.object.title }}
-                                    </div>
-                                {% endif %}
-                            {% endif %}
-                            {% if element.object.is_text %}
-                                <div class="text {{ element.css_class_pos }}">
-                                    {% if element.object.month == None %}<div class="date">{{ element.object.date_vk|date(('d E Y')) }}</div>{% endif %}
-                                    {{ element.object.text|linebreaksbr }}
-                                </div>
-                            {% endif %}
-                        {% endfor %}
-
-                        </div>
-                        <div class="page-num-center">{{ view.page_num }}</div>
-                        {{ view.page_num_add() }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endfor %}
-
-    </div>
-</body>
-</html>
+{% endblock %}
