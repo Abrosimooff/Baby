@@ -3,13 +3,16 @@ import datetime
 import json
 import random
 from collections import defaultdict
+from urllib.parse import urljoin
 
 import hashids
 import pytz
+from django.http import HttpResponseNotFound
 from django.urls import resolve, reverse
 from django.utils.functional import cached_property
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, DetailView
 
+from baby.settings import CURRENT_HOST
 from bot.base import BaseLine, DEFAULT_KEYBOARD
 from bot.helpers import DateUtil
 from bot.models import UserVK, Baby, BabyUserVK, BabyHistory, BabyHistoryAttachment, AttachType, BabyHeight, BabyWeight
@@ -83,9 +86,18 @@ class AlbumView(BaseLine):
     """ Получить альбом """
 
     def bot_handler(self, request, *args, **kwargs):
+        message = 'Пока продолжайте наполнять альбом, а через месяцок я уже смогу показать, что у нас получается :)'
+
+        if BabyHistory.objects.filter(baby=self.user_vk.baby).count() > 10:
+            hashids_code = hashids.Hashids().encode(self.user_vk.user_vk_id, self.user_vk.baby.id, 1)
+            href = urljoin(base='http://' + CURRENT_HOST, url=reverse('album_preview', args=[hashids_code]))
+            message = 'Когда закончите заполнять альбом, тогда я сформирую для вас готовый вариант.\n\n' \
+                      'А пока поделюсь с вами ссылкой на последние страницы альбома.\n' \
+                      '{}'.format(href)
+
         self.request.vk_api.messages.send(
             user_id=self.user_vk.user_vk_id,
-            message=u'А это пока рано..',
+            message=message,
             random_id=random.randint(0, 10000000),
             keyboard=json.dumps(DEFAULT_KEYBOARD)
         )
@@ -647,33 +659,30 @@ class SettingsLine(BaseLine):
             b2u = BabyUserVK.objects.create(user_vk=self.user_vk, baby=baby)
 
 
-class AlbumPrint(TemplateView):
-    """ Формируем альбом """
-    page_num = 1
+class BabyHistoryMix(object):
 
-    def page_num_add(self):
-        self.page_num += 1
-        return ''
+    def message_qs(self, baby):
+        return BabyHistory.objects.select_related('baby').filter(baby=baby)
 
-    def get_template_names(self):
-        return 'bot/album{}_landscape.jinja2'.format(self.kwargs['album_pk'])
+    def photo_qs(self, baby):
+        return BabyHistoryAttachment.objects.select_related('history').filter(history__baby=baby)
 
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        baby_id = kwargs['baby_pk']
-        baby = Baby.objects.filter(pk=baby_id).first()
+    def measure_qs(self, model, baby):
+        return model.objects.filter(baby=baby).order_by('date')
 
-        messages = BabyHistory.objects.select_related().filter(baby=baby)
+    def baby_history(self, baby):
+        """ Вся история малыша """
+        messages = self.message_qs(baby)
         photo_dict = defaultdict(list)
-        for photo in BabyHistoryAttachment.objects.select_related().filter(history__baby=baby):
+        for photo in self.photo_qs(baby):
             photo_dict[photo.history_id].append(photo.url)
 
         # Измерения
 
         measure_dict = defaultdict(list)
-        for object in BabyHeight.objects.filter(baby=baby).order_by('date'):
+        for object in self.measure_qs(BabyHeight, baby):
             measure_dict[object.date].append(object)
-        for object in BabyWeight.objects.filter(baby=baby).order_by('date'):
+        for object in self.measure_qs(BabyWeight, baby):
             measure_dict[object.date].append(object)
 
         today = datetime.date.today()
@@ -705,10 +714,66 @@ class AlbumPrint(TemplateView):
                 if measure_dict.get(date):
                     pager.add_measure(measure_dict.pop(date))
             period['page_list'] = pager.page_list
+        return baby_history
 
-        ctx['baby'] = baby
+
+class AlbumPrint(BabyHistoryMix, DetailView):
+    """ Формируем альбом """
+    page_num = 1
+    baby = None
+    pk_url_kwarg = 'baby_pk'
+    model = Baby
+
+    def page_num_add(self):
+        self.page_num += 1
+        return ''
+
+    def get_template_names(self):
+        return 'bot/album{}_landscape.jinja2'.format(self.kwargs['album_pk'])
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['baby'] = self.object
         ctx['view'] = self
-        ctx['baby_history'] = baby_history
+        ctx['baby_history'] = self.baby_history(self.object)
+        return ctx
+
+
+class AlbumPreview(BabyHistoryMix, TemplateView):
+    """ Показать превьюшку альбома """
+    hash_params = ['user_vk_id', 'baby_id', 'album_id']
+    hash_values = {}
+
+    def get(self, request, *args, **kwargs):
+        codes = hashids.Hashids().decode(self.kwargs.get('hashids'))
+        if codes and len(codes) == len(self.hash_params):
+            self.hash_values = dict(zip(self.hash_params, codes))
+            return super().get(request, *args, **kwargs)
+        return HttpResponseNotFound()
+
+    def get_template_names(self):
+        return 'bot/preview/preview{}_landscape.jinja2'.format(self.hash_values['album_id'])
+
+    @cached_property
+    def baby(self):
+        return Baby.objects.filter(pk=self.hash_values['baby_id']).first()
+
+    def message_qs(self, baby):
+        return sorted(BabyHistory.objects.select_related('baby').filter(baby=baby).order_by('-date_vk')[:5], key=lambda x: x.date_vk)
+
+    def photo_qs(self, baby):
+        return sorted(BabyHistoryAttachment.objects.select_related('history')
+                      .filter(history__baby=baby).order_by('-history__date_vk')[:100],
+                      key=lambda x: x.history.date_vk)
+
+    def measure_qs(self, model, baby):
+        return sorted(model.objects.filter(baby=baby).order_by('-date')[:1], key=lambda x: x.date)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['baby'] = self.baby
+        ctx['view'] = self
+        ctx['baby_history'] = self.baby_history(self.baby)
         return ctx
 
 

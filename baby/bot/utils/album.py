@@ -10,7 +10,6 @@ class AlbumPager(object):
         self.object_list = []
 
     def add(self, history, photo_list):
-
         if history.text and len(history.text) > self.MAX_TITLE_CHARS:
             if len(history.text) <= self.CHUNK_TEXT_CHARS:
                 history.is_text = True
@@ -28,6 +27,11 @@ class AlbumPager(object):
                                 self.text += ' ...'
 
                     self.object_list.append(PartHistory(text, history.date_vk))
+
+        else:
+            if not photo_list:  # Если текст маленький, как подпись к фото, но фотографий нет, то считаем этот текстом
+                history.is_text = True
+                self.object_list.append(history)
 
         for index, photo in enumerate(photo_list):
             history_text = not index and history.text and len(

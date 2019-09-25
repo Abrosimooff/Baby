@@ -24,7 +24,14 @@ SECRET_KEY = ')yjx6785%03e+r@1wdbkc=v=s)$+rp@(9@m5cu0!ytbr%f4x@c'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
-ALLOWED_HOSTS = ['baby-bot.na4u.ru', 'localhost']
+from baby import settings_local
+
+try:
+    CURRENT_HOST = settings_local.CURRENT_HOST
+except:
+    CURRENT_HOST = 'baby-bot.na4u.ru'
+
+ALLOWED_HOSTS = [CURRENT_HOST, 'localhost']
 
 
 # Application definition

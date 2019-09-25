@@ -89,6 +89,9 @@ class BabyHistory(models.Model):
     class Meta:
         ordering = ('date_vk',)
 
+    def __str__(self):
+        return self.text
+
 
 class AttachType(object):
     """ Виды вложений """
