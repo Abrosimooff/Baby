@@ -400,8 +400,8 @@ class Sender(object):
             else:
                 context['baby_str'] = 'ваш малыш'
             message = MONTH_MESSAGES.get(month_count)
-            print(self.on_date, baby, month_count, message)
             if message:
+                print(self.on_date, baby, month_count, message.format(**context))
                 for user_vk in baby.parent_list:
                     user_vk.wait_payload = None
                     user_vk.save()
