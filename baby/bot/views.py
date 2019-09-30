@@ -896,9 +896,12 @@ class PastMonthsAddView(AddHistory):
                 ]
             ]
         )
-        # self.user_vk.wait_payload = dict(action='/past/months/add/{}/'.format(self.get_month()))
         self.user_vk.wait_payload = dict(action=reverse('past_month_add', args=[self.get_month()]))
         self.user_vk.save()
+
+    def get_response_msg(self):
+        message = super().get_response_msg()
+        return message + '\nА когда закончите наполнять месяц - нажмите кнопку "Выйти из заполнения прошлого".'
 
     def bot_handler(self, request, *args, **kwargs):
         if request.message.payload: # Если пришло сообщение, которое = нажатие на кнопку
