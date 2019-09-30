@@ -401,8 +401,8 @@ class Sender(object):
                 context['baby_str'] = 'ваш малыш'
             message = MONTH_MESSAGES.get(month_count)
             if message:
-                print(self.on_date, baby, month_count, message.format(**context))
                 for user_vk in baby.parent_list:
+                    print('user vk: {} baby: #{} {}, месяцев: {}'.format(user_vk.user_vk_id, baby.id, baby, month_count))
                     user_vk.wait_payload = None
                     user_vk.save()
                     VkHelp().vk_api.messages.send(
