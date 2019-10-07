@@ -2,7 +2,7 @@
 class AlbumPager(object):
     object_list = []  # Все элементы альбома по очереди (т.е элементы одного месяца)
     css_classes = ['pos-left-top', 'pos-right-top', 'pos-left-bottom', 'pos-right-bottom', ]
-    CHUNK_TEXT_CHARS = 200
+    CHUNK_TEXT_CHARS = 250
     MAX_TITLE_CHARS = 50
 
     def __init__(self) -> None:

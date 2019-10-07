@@ -1,0 +1,83 @@
+{%  extends 'bot/albums/_base_album_landscape.jinja2' %}
+
+{% block css %}
+    <style>
+        .page{
+            background-image: url("/static/img/albums/1/bg.jpg");
+            background-position: right;
+            outline: 0.5cm solid rgba(255, 255, 255, 0.8);
+            outline-offset: -0.5cm;
+        }
+        .page:nth-child(2n){background-position: bottom}
+        .page-num-center{
+            color:#fff; font-weight: bold; font-size: 0.6cm;text-shadow: 0px 0px 2px #333;
+        }
+        .photo-wrap{
+            overflow: hidden;
+            border: 5px dashed #fff; border-radius: 100%;
+        }
+        .text{
+            font-family: 'Caveat', cursive; font-size: 0.7cm; color: #000;
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 0.5cm; border-radius: 0.5cm; max-width: 12cm;
+            min-width: 4cm;
+        }
+        .title{
+            font-family: 'Caveat', cursive; font-size: 0.7cm; color: #000;
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 0.2cm; border-radius: 0.5cm; max-width: 6cm;
+        }
+
+        .text.pos-left-bottom{border-radius: 0.5cm 0.5cm 0.5cm 0cm}
+        .text.pos-left-top{border-radius: 0cm 0.5cm 0.5cm 0.5cm}
+        .text.pos-right-top{border-radius: 0.5cm 0cm 0.5cm 0.5cm}
+        .text.pos-right-bottom{border-radius: 0.5cm 0.5cm 0cm 0.5cm}
+
+        .text.pos-left-bottom .date{position: absolute; font-size: 0.5cm; left: 0.5cm; bottom: -0.8cm; }
+        .text.pos-left-top .date{position: absolute; font-size: 0.5cm; left: 0.5cm; top: -0.8cm; }
+        .text.pos-right-top .date{position: absolute; font-size: 0.5cm; right: 0.5cm; top: -0.8cm; }
+        .text.pos-right-bottom .date{position: absolute; font-size: 0.5cm; right: 0.5cm; bottom: -0.8cm; }
+
+        .title.pos-left-bottom{position: absolute; font-size: 0.5cm; left: 9cm; bottom: 8.5cm; border-radius: 0.5cm 0.5cm 0.5cm 0cm; }
+        .title.pos-left-top{position: absolute; font-size: 0.5cm; left: 9.5cm; top: 1.5cm;  border-radius: 0.5cm 0.5cm 0.5cm 0cm;}
+        .title.pos-right-top{position: absolute; font-size: 0.5cm; right: 10.5cm; top: 5cm;  border-radius: 0.5cm 0cm 0.5cm 0.5cm; }
+        .title.pos-right-bottom{position: absolute; font-size: 0.5cm; right: 10.5cm; bottom: 5cm; border-radius: 0.5cm 0.5cm 0cm 0.5cm;}
+
+        .women .month, .women .height, .women .weight , .women .color{color: #ff619d;}
+        .men .month, .men .height, .men .weight , .men .color{color: #55c6ff;}
+
+        .text p{margin: 0px;}
+        .month{
+            font-family: 'Neucha', cursive; font-size: 5cm; letter-spacing: 0.2cm;
+            text-align: center; padding-top: 5cm;
+        }
+        .height{font-family: 'Neucha', cursive; }
+        .height .height-icon{font-size: 4cm;  display: inline-block;}
+        .height .height-date{font-size: 0.8cm; margin-bottom: 0.5cm; display: block; vertical-align: text-bottom}
+        .height .height-value{font-size: 1.5cm; display: inline-block; letter-spacing: 0.2cm}
+
+        .weight{font-family: 'Neucha', cursive;}
+        .weight .weight-icon{font-size: 4cm; display: inline-block;}
+        .weight .weight-date{font-size: 0.8cm; margin-bottom: 0.5cm; display: block; vertical-align: text-bottom; }
+        .weight .weight-value{font-size: 1.5cm; display: inline-block; vertical-align: text-bottom; }
+
+        .height.pos-left-bottom, .weight.pos-left-bottom{bottom:3cm;}
+        .height.pos-left-top, .weight.pos-left-top{top: 3cm;}
+        .height.pos-right-top, .weight.pos-right-top{top: 3cm;}
+        .height.pos-right-bottom, .weight.pos-right-bottom{bottom:3cm;}
+
+        .caveat{font-family: 'Caveat', cursive;}
+        .neucha{font-family: 'Neucha', cursive;}
+        .home.subpage{
+            margin: 1cm; padding: 1cm;
+            height: 149mm;
+            border:0.2cm double #fff;
+        }
+        .home.subpage .data{
+            padding: 1.2cm;
+            background-color: rgba(255, 255, 255, 0.7);
+            width: 100%; height: 100%; text-align: center;
+        }
+
+    </style>
+{% endblock %}

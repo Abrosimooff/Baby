@@ -729,7 +729,7 @@ class AlbumPrint(BabyHistoryMix, DetailView):
         return ''
 
     def get_template_names(self):
-        return 'bot/album{}_landscape.jinja2'.format(self.kwargs['album_pk'])
+        return 'bot/albums/landscape/{}.jinja2'.format(self.kwargs['album_pk'])
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)

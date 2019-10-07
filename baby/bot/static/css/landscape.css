@@ -53,7 +53,7 @@ body {
 .height{font-family: 'Neucha', cursive; }
 .height .height-icon{font-size: 4cm;  display: inline-block;}
 .height .height-date{font-size: 0.8cm; margin-bottom: 0.5cm; display: block; vertical-align: text-bottom}
-.height .height-value{font-size: 1.5cm; display: inline-block; letter-spacing: 0.2cm}
+.height .height-value{font-size: 1.5cm; display: inline-block; }
 
 .weight{font-family: 'Neucha', cursive;}
 .weight .weight-icon{font-size: 4cm; display: inline-block;}
