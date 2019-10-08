@@ -6,7 +6,7 @@ from bot.views import SettingsLine, Welcome, AddHistory, AlbumView, EditHistory,
     HelpView, SharingGetView, AlbumPrint, PastMonthsView, PastMonthsAddView, ExitView, AlbumPreview, IndexView
 
 urlpatterns = [
-    url(r'^', IndexView.as_view()),
+    url(r'^$', IndexView.as_view()),
     url(r'^welcome', Welcome.as_view()),
     url(r'^settings/(?P<question_pk>.+)/', SettingsLine.as_view()),
     url(r'^add_history', AddHistory.as_view()),
