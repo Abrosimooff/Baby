@@ -76,7 +76,10 @@ class BabyUserVK(models.Model):
 
 
 class BabyHistory(models.Model):
-    """ История-Хроника ребёнка """
+    """ История-Хроника ребёнка
+        utf8mb4_unicode_ci - чтобы emoji можно было сохранять в таблицу
+        https://900913.ru/2015/05/29/mysql-django-emoji/
+    """
     baby = models.ForeignKey(Baby, on_delete=CASCADE, verbose_name=u'Младенец')
     text = models.TextField(verbose_name=u'Текст сообщения')
     user_vk = models.ForeignKey(UserVK, on_delete=CASCADE, verbose_name=u'Автор заметки')

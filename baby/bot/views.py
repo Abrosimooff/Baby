@@ -24,6 +24,25 @@ from bot.validators import ValidateGenderList, FirstNameValidate, ValidateYearLi
 class IndexView(TemplateView):
     template_name = 'bot/index.jinja2'
 
+
+class VkApp(TemplateView):
+    """  Полная версия приложения для ВК """
+    template_name = 'bot/index.jinja2'
+
+    # https://vk.com/dev/vk_apps_docs3?f=6.%20%D0%9F%D0%B0%D1%80%D0%B0%D0%BC%D0%B5%D1%82%D1%80%D1%8B%20%D0%B7%D0%B0%D0%BF%D1%83%D1%81%D0%BA%D0%B0
+
+    # https://baby-bot.na4u.ru/?
+    # vk_access_token_settings=notify&
+    # vk_app_id=7162935&
+    # vk_are_notifications_enabled=0&
+    # vk_is_app_user=1&
+    # vk_language=ru&
+    # vk_platform=desktop_web&
+    # vk_ref=other&
+    # vk_user_id=198163426&
+    # sign=jFHTnOwRr220ScU77mem1NpwczhPOIm0bCt2uefNMLs
+
+
 class Welcome(BaseLine):
     """ Первое приветственное сообщение и перенаправление на настройки|код ребёнка """
 
