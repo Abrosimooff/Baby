@@ -21,6 +21,9 @@ from bot.validators import ValidateGenderList, FirstNameValidate, ValidateYearLi
     ValidateBirthDate, HeightValidate, WeightValidate
 
 
+class IndexView(TemplateView):
+    template_name = 'bot/index.jinja2'
+
 class Welcome(BaseLine):
     """ Первое приветственное сообщение и перенаправление на настройки|код ребёнка """
 
