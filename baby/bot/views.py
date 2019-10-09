@@ -29,8 +29,12 @@ class VkApp(TemplateView):
     """  Полная версия приложения для ВК """
     template_name = 'bot/index.jinja2'
 
-    # https://vk.com/dev/vk_apps_docs3?f=6.%20%D0%9F%D0%B0%D1%80%D0%B0%D0%BC%D0%B5%D1%82%D1%80%D1%8B%20%D0%B7%D0%B0%D0%BF%D1%83%D1%81%D0%BA%D0%B0
+    def render_to_response(self, context, **response_kwargs):
+        response = super().render_to_response(context, **response_kwargs)
+        response['X-Frame-Options'] = 'allow-from: vk.com'
+        return response
 
+    # https://vk.com/dev/vk_apps_docs3?f=6.%20%D0%9F%D0%B0%D1%80%D0%B0%D0%BC%D0%B5%D1%82%D1%80%D1%8B%20%D0%B7%D0%B0%D0%BF%D1%83%D1%81%D0%BA%D0%B0
     # https://baby-bot.na4u.ru/?
     # vk_access_token_settings=notify&
     # vk_app_id=7162935&
