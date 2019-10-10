@@ -221,9 +221,11 @@ class HeightView(MeasureView):
             delta = self.new_measure.height - self.last_measure.height
             ctx['days'] = (self.new_measure.date - self.last_measure.date).days
             ctx['cm'] = self.model.cm_to_str(delta)
-            return 'Готово. Значит вы уже {measure_str} За {days}дн. {first_name} подрос{la} на {cm}\n' \
-                   'Спасибо, что передали показания!)\n' \
-                   'Можете продолжать вести альбом :)'.format(**ctx)
+            if ctx['days']:
+                dinamic_text = 'Готово. Значит вы уже {measure_str} За {days} дн. {first_name} подрос{la} на {cm}\n'
+            else:
+                dinamic_text = 'Готово. Ваши сегодняшние показания роста заменены на {measure_str}\n'
+            return dinamic_text.format(**ctx) + 'Спасибо, что передали показания!)\nМожете продолжать вести альбом :)'
         return 'Готово. Ваши первые показания роста ({measure_str}) приняты!\n' \
                'Спасибо, не забывайте периодически сообщать о новых сантиметрах)\n' \
                'А сейчас можете продолжать вести альбом :)'.format(**ctx)
@@ -246,8 +248,12 @@ class WeightView(MeasureView):
             delta = self.new_measure.weight - self.last_measure.weight
             ctx['days'] = (self.new_measure.date - self.last_measure.date).days
             ctx['g'] = self.model.gramm_to_str(delta)
-            return 'Готово. Значит вы уже {measure_str} За {days}дн. {first_name} подрос{la} на {g} Спасибо, что передали показания!)\n' \
-                   'Можете продолжать вести альбом :)'.format(**ctx)
+            if ctx['days']:
+                dinamic_text = 'Готово. Значит вы уже {measure_str} За {days} дн. {first_name} подрос{la} на {g}\n'
+            else:
+                dinamic_text = 'Готово. Ваши сегодняшние показания веса заменены на {measure_str}\n'
+
+            return dinamic_text.format(**ctx) + 'Спасибо, что передали показания!)\n Можете продолжать вести альбом :)'
         return 'Готово. Ваши первые показания веса({measure_str}) приняты!\n' \
                'Спасибо, не забывайте периодически сообщать о новых граммах)\n' \
                'А сейчас можете продолжать вести альбом :)'.format(**ctx)
