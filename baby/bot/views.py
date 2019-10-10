@@ -34,6 +34,18 @@ class VkApp(TemplateView):
         response['X-Frame-Options'] = 'allow-from: vk.com'
         return response
 
+    @cached_property
+    def user_vk(self):
+        try:
+            return UserVK.objects.get(user_vk_id=self.request.GET('vk_user_id'))
+        except:
+            return None
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['user_vk'] = self.user_vk
+        return ctx
+
     # https://vk.com/dev/vk_apps_docs3?f=6.%20%D0%9F%D0%B0%D1%80%D0%B0%D0%BC%D0%B5%D1%82%D1%80%D1%8B%20%D0%B7%D0%B0%D0%BF%D1%83%D1%81%D0%BA%D0%B0
     # https://baby-bot.na4u.ru/?
     # vk_access_token_settings=notify&

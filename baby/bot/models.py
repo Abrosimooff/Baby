@@ -16,6 +16,13 @@ class UserVK(models.Model):
     user_vk_id = models.IntegerField(verbose_name=u'ID пользователя ВК')
     wait_payload = JSONField(null=True, blank=True, verbose_name=u'Инфо об ожидаемом ответе')
 
+    class Meta:
+        verbose_name = ' Пользователь ВК'
+        verbose_name_plural = ' Пользователи ВК'
+
+    def __str__(self):
+        return '{} {} ({})'.format(self.first_name, self.last_name, self.user_vk_id)
+
     @property
     def wait_payload_dict(self):
         """ Преобразовать в дикт """
@@ -44,6 +51,10 @@ class Baby(models.Model):
     first_name = models.CharField(max_length=100, verbose_name=u'Имя младенца')
     birth_date = models.DateField(verbose_name=u'Дата рождения', null=True, blank=True)
     gender = models.PositiveSmallIntegerField(choices=GENDER_CHOICES.items(), verbose_name=u'Пол')
+
+    class Meta:
+        verbose_name = 'Ребёнок'
+        verbose_name_plural = 'Дети'
 
     def __str__(self):
         return u'{} {}'.format(self.first_name, str(self.birth_date))
@@ -74,6 +85,13 @@ class BabyUserVK(models.Model):
     user_vk = models.ForeignKey(UserVK, on_delete=CASCADE)
     baby = models.ForeignKey(Baby, on_delete=CASCADE)
 
+    class Meta:
+        verbose_name = 'Связка пользователя с ребёнком'
+        verbose_name_plural = 'Связки пользователей с детьми'
+
+    def __str__(self):
+        return '{} + {}'.format(self.user_vk, self.baby)
+
 
 class BabyHistory(models.Model):
     """ История-Хроника ребёнка
@@ -90,6 +108,8 @@ class BabyHistory(models.Model):
     other_attach_vk = models.BooleanField(verbose_name=u'Есть ли другие вложения в сообщении кроме фото', default=False)
 
     class Meta:
+        verbose_name = 'Сообщение'
+        verbose_name_plural = 'Сообщения'
         ordering = ('date_vk',)
 
     def __str__(self):
@@ -107,6 +127,13 @@ class BabyHistoryAttachment(models.Model):
     attachment_type = models.CharField(max_length=50)
     url = models.URLField(verbose_name=u'Путь')
 
+    class Meta:
+        verbose_name = 'Вложение'
+        verbose_name_plural = 'Вложения'
+
+    def __str__(self):
+        return self.url
+
 
 class BabyHeight(models.Model):
     """ Рост ребёнка """
@@ -116,6 +143,8 @@ class BabyHeight(models.Model):
 
     class Meta:
         unique_together = ['baby', 'date']
+        verbose_name = 'Показание роста'
+        verbose_name_plural = 'Показания роста'
 
     def __str__(self):
         return self.height_str
@@ -137,6 +166,8 @@ class BabyWeight(models.Model):
     weight = models.PositiveSmallIntegerField(verbose_name=u'Вес в граммах')
 
     class Meta:
+        verbose_name = 'Показание веса'
+        verbose_name_plural = 'Показания веса'
         unique_together = ['baby', 'date']
 
     def __str__(self):
