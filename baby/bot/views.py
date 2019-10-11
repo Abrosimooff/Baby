@@ -432,13 +432,12 @@ class AddHistory(BaseLine):
 
 
     def bot_handler(self, request, *args, **kwargs):
-
         # в messages_dict есть:
         # 'date', 'from_id', 'id', 'out', 'peer_id', 'text', 'conversation_message_id', 'fwd_messages',
         # 'important', 'random_id', 'attachments', 'is_hidden']
 
         message_dict = request.message.message['items'][0]
-        self.message_date = datetime.datetime.fromtimestamp(message_dict['date'])
+        self.message_date = pytz.utc.localize(datetime.datetime.fromtimestamp(message_dict['date']))
         self.message_id = request.message.id
         self.message_text = request.message.text
         self.photo_list = request.message.photo_list
