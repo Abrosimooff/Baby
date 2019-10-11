@@ -21,7 +21,11 @@ class UserVK(models.Model):
         verbose_name_plural = ' Пользователи ВК'
 
     def __str__(self):
-        return '{} {} ({})'.format(self.first_name, self.last_name, self.user_vk_id)
+        return '{} {}'.format(self.first_name, self.last_name)
+
+    @property
+    def vk_url(self):
+        return 'vk.com/id{}'.format(self.user_vk_id)
 
     @property
     def wait_payload_dict(self):
