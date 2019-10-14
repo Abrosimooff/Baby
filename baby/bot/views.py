@@ -934,7 +934,7 @@ class VkApp(BabyHistoryMix, DetailView):
     model = Baby
 
     def get(self, request, *args, **kwargs):
-        if self.user_vk:
+        if self.user_vk and self.user_vk.baby:
             return super().get(request, *args, **kwargs)
         return HttpResponseNotFound()
 
