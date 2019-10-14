@@ -45,6 +45,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    {% block head %}
     <meta charset="UTF-8">
     <title>{% block title %}{{ baby.first_name|capitalize }}. Первый Альбом{% endblock %}</title>
     <link rel="stylesheet" href="/static/css/base.css">
@@ -52,6 +53,7 @@
     <link href="https://fonts.googleapis.com/css?family=Caveat|Neucha|Comfortaa&display=swap" rel="stylesheet">
     <link href="/static/icons/css/iconpack_01.css" rel="stylesheet" />
     {% block css %}{% endblock %}
+    {% endblock %}
 </head>
 <body>
 {% block album %}
