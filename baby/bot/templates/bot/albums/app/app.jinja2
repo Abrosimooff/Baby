@@ -2,7 +2,7 @@
 
 {% block head %}
 <meta charset="UTF-8">
-<title>{% block title %}{{ baby.first_name|capitalize }}. Первый Альбом{% endblock %}</title>
+<title>{% block title %}{% if baby %}{{ baby.first_name|capitalize }}. {% endif %}Первый Альбом{% endblock %}</title>
 <link href="https://fonts.googleapis.com/css?family=Caveat|Neucha|Comfortaa&display=swap" rel="stylesheet">
 <link href="/static/icons/css/iconpack_01.css" rel="stylesheet" />
     {% block css %}
@@ -51,27 +51,51 @@
     {% endblock %}
 {% endblock %}
 
-        {% block first_page %}
-            <div class="page">
-                <div class="subpage home">
-                        <div class="data">
-                            <div class="font neucha" style="font-size: 1cm; color: #76b1d5;">Альбом младенца. Бот</div>
-                            <div class="font neucha" style="font-size: 1cm; color: #7c7c7c; margin-top: 10px">Просмотр</div>
-                            <div class="font neucha" style="font-size: 1cm; color: #7c7c7c">структуры альбома</div>
-                        </div>
+{% block first_page %}
+    <div class="page">
+        <div class="subpage home">
+                <div class="data">
+                    <div class="font neucha" style="font-size: 1cm; color: #76b1d5;">Альбом младенца. Бот</div>
+                    <div class="font neucha" style="font-size: 1cm; color: #7c7c7c; margin-top: 10px">Просмотр</div>
+                    <div class="font neucha" style="font-size: 1cm; color: #7c7c7c">структуры альбома</div>
+                </div>
+        </div>
+    </div>
+    <div class="page">
+        <div class="subpage home">
+                <div class="data">
+                    <div class="font neucha" style="font-size: 1cm; color: #7c7c7c">{{ baby.birth_date|date('j E Y') }} года</div>
+                    <div class="font neucha" style="font-size: 1cm; color: #7c7c7c">наконец {% if baby.is_women %}родилась{% else %}родился{% endif %}</div>
+                    <div class="font neucha" style="font-size: 1cm; color: #7c7c7c">наш{% if baby.is_women %}а{% endif %}</div>
+                    <div class="font neucha first_name color" style="font-size: 3cm;">{{ baby.first_name }}</div>
+                    <div class="font neucha" style="font-size: 1cm; color: #7c7c7c">и</div>
+                    <div class="font neucha" style="font-size: 1cm; color: #7c7c7c">это {% if baby.is_women %}её{% else %}его{% endif %}</div>
+                    <div class="font neucha" style="font-size: 1cm; color: #7c7c7c">Первый Альбом</div>
+                </div>
+        </div>
+    </div>
+{% endblock first_page %}
+
+{% block not_baby %}
+    <div class="page">
+        <div class="subpage home">
+                <div class="data">
+                    <div class="font neucha" style="font-size: 1cm; color: #76b1d5;">Альбом младенца. Бот</div>
+                    <div class="font neucha" style="color: #76b1d5; margin-top: 20px"><span style="font-size: 50px" class="icon-camera-alt"></span></div>
+                    <div class="font neucha" style="font-size: 1cm; color: #7c7c7c; margin-top: 20px">Альбом</div>
+                    <div class="font neucha" style="font-size: 1cm; color: #7c7c7c">ещё не создан</div>
+                </div>
+        </div>
+    </div>
+    <div class="page">
+    <div class="subpage home">
+                <div class="data" style="line-height: 30px">
+                    <div class="font neucha" style="font-size: 1cm; color: #7c7c7c">Чтобы создать альбом</div>
+                    <div class="font neucha" style="font-size: 1cm; color: #7c7c7c">&mdash;</div>
+                    <div class="font neucha" style="font-size: 1cm; color: #7c7c7c">перейдите в группу</div>
+                    <div class="font neucha" style="font-size: 1cm; color: #76b1d5;"><a style="color: #76b1d5;" href="https://vk.com/ibabybot">Альбом младенца. Бот</a></div>
+                    <div class="font neucha" style="font-size: 1cm; color: #7c7c7c">и напишите боту <span class="icon-emo-happy"></span></div>
                 </div>
             </div>
-            <div class="page">
-                <div class="subpage home">
-                        <div class="data">
-                            <div class="font neucha" style="font-size: 1cm; color: #7c7c7c">{{ baby.birth_date|date('j E Y') }} года</div>
-                            <div class="font neucha" style="font-size: 1cm; color: #7c7c7c">наконец {% if baby.is_women %}родилась{% else %}родился{% endif %}</div>
-                            <div class="font neucha" style="font-size: 1cm; color: #7c7c7c">наш{% if baby.is_women %}а{% endif %}</div>
-                            <div class="font neucha first_name color" style="font-size: 3cm;">{{ baby.first_name }}</div>
-                            <div class="font neucha" style="font-size: 1cm; color: #7c7c7c">и</div>
-                            <div class="font neucha" style="font-size: 1cm; color: #7c7c7c">это {% if baby.is_women %}её{% else %}его{% endif %}</div>
-                            <div class="font neucha" style="font-size: 1cm; color: #7c7c7c">Первый Альбом</div>
-                        </div>
-                </div>
-            </div>
-        {% endblock first_page %}
+    </div>
+{% endblock %}

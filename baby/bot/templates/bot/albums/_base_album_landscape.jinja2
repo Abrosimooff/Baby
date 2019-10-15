@@ -47,7 +47,7 @@
 <head>
     {% block head %}
     <meta charset="UTF-8">
-    <title>{% block title %}{{ baby.first_name|capitalize }}. Первый Альбом{% endblock %}</title>
+    <title>{% block title %}{% if baby %}{{ baby.first_name|capitalize }}. {% endif %}Первый Альбом{% endblock %}</title>
     <link rel="stylesheet" href="/static/css/base.css">
     <link rel="stylesheet" href="/static/css/landscape.css">
     <link href="https://fonts.googleapis.com/css?family=Caveat|Neucha|Comfortaa&display=swap" rel="stylesheet">
@@ -56,51 +56,56 @@
     {% endblock %}
 </head>
 <body>
-{% block album %}
-    <div class="album {% if baby.is_women %}women{% else %}men{% endif %}">
-        {% block first_page %}
-            <div class="page">
-                <div class="subpage home">
-                        <div class="data">
-                            <div class="font neucha" style="font-size: 1cm; color: #7c7c7c">{{ baby.birth_date|date('j E Y') }} года</div>
-                            <div class="font neucha" style="font-size: 1cm; color: #7c7c7c">наконец {% if baby.is_women %}родилась{% else %}родился{% endif %}</div>
-                            <div class="font neucha" style="font-size: 1cm; color: #7c7c7c">наш{% if baby.is_women %}а{% endif %}</div>
-                            <div class="font neucha first_name color" style="font-size: 3cm;">{{ baby.first_name }}</div>
-                            <div class="font neucha" style="font-size: 1cm; color: #7c7c7c">и</div>
-                            <div class="font neucha" style="font-size: 1cm; color: #7c7c7c">это {% if baby.is_women %}её{% else %}его{% endif %}</div>
-                            <div class="font neucha" style="font-size: 1cm; color: #7c7c7c">Первый Альбом</div>
-                        </div>
-                </div>
-            </div>
-        {% endblock first_page %}
-
-        {% for h in baby_history %}
-            {% if h.page_list %}
+{% if baby %}
+    {% block album %}
+        <div class="album {% if baby.is_women %}women{% else %}men{% endif %}">
+            {% block first_page %}
                 <div class="page">
-                    <div class="subpage">
-                        <div class="month"><b>{% if h.delta.years or h.delta.months %}{{ h.text }}{% else %}Первые дни{% endif %}</b></div>
+                    <div class="subpage home">
+                            <div class="data">
+                                <div class="font neucha" style="font-size: 1cm; color: #7c7c7c">{{ baby.birth_date|date('j E Y') }} года</div>
+                                <div class="font neucha" style="font-size: 1cm; color: #7c7c7c">наконец {% if baby.is_women %}родилась{% else %}родился{% endif %}</div>
+                                <div class="font neucha" style="font-size: 1cm; color: #7c7c7c">наш{% if baby.is_women %}а{% endif %}</div>
+                                <div class="font neucha first_name color" style="font-size: 3cm;">{{ baby.first_name }}</div>
+                                <div class="font neucha" style="font-size: 1cm; color: #7c7c7c">и</div>
+                                <div class="font neucha" style="font-size: 1cm; color: #7c7c7c">это {% if baby.is_women %}её{% else %}его{% endif %}</div>
+                                <div class="font neucha" style="font-size: 1cm; color: #7c7c7c">Первый Альбом</div>
+                            </div>
                     </div>
-                    <div class="page-num-center">{{ view.page_num }}</div>
-                    {{ view.page_num_add() }}
                 </div>
-                {% for page in h.page_list %}
+            {% endblock first_page %}
+
+            {% for h in baby_history %}
+                {% if h.page_list %}
                     <div class="page">
                         <div class="subpage">
-                        {% for element in page %}
-                            {% if element.object.is_photo %} {{ render_photo(element) }} {% endif %}
-                            {% if element.object.is_text %} {{ render_text(element) }} {% endif %}
-                            {% if element.object.height %} {{ render_height(element) }} {% endif %}
-                            {% if element.object.weight %} {{ render_weight(element) }} {% endif %}
-                        {% endfor %}
+                            <div class="month"><b>{% if h.delta.years or h.delta.months %}{{ h.text }}{% else %}Первые дни{% endif %}</b></div>
                         </div>
                         <div class="page-num-center">{{ view.page_num }}</div>
                         {{ view.page_num_add() }}
                     </div>
-                {% endfor %}
-            {% endif %}
-        {% endfor %}
-    </div>
-{% endblock %}
+                    {% for page in h.page_list %}
+                        <div class="page">
+                            <div class="subpage">
+                            {% for element in page %}
+                                {% if element.object.is_photo %} {{ render_photo(element) }} {% endif %}
+                                {% if element.object.is_text %} {{ render_text(element) }} {% endif %}
+                                {% if element.object.height %} {{ render_height(element) }} {% endif %}
+                                {% if element.object.weight %} {{ render_weight(element) }} {% endif %}
+                            {% endfor %}
+                            </div>
+                            <div class="page-num-center">{{ view.page_num }}</div>
+                            {{ view.page_num_add() }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endblock %}
+{% else %}
+    {% block not_baby %}
+    {% endblock%}
+{% endif %}
 </body>
 </html>
 

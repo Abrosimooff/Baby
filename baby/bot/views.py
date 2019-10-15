@@ -933,10 +933,10 @@ class VkApp(BabyHistoryMix, DetailView):
     page_num = 1
     model = Baby
 
-    def get(self, request, *args, **kwargs):
-        if self.user_vk and self.user_vk.baby:
-            return super().get(request, *args, **kwargs)
-        return HttpResponseNotFound()
+    # def get(self, request, *args, **kwargs):
+    #     if self.user_vk and self.user_vk.baby:
+    #         return super().get(request, *args, **kwargs)
+    #     return HttpResponseNotFound()
 
     def render_to_response(self, context, **response_kwargs):
         response = super().render_to_response(context, **response_kwargs)
@@ -955,14 +955,15 @@ class VkApp(BabyHistoryMix, DetailView):
         return ''
 
     def get_object(self, queryset=None):
-        return self.user_vk.baby
+        return self.user_vk and self.user_vk.baby
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
+        ctx['view'] = self
         ctx['user_vk'] = self.user_vk
         ctx['baby'] = self.object
-        ctx['view'] = self
-        ctx['baby_history'] = self.baby_history(self.object)
+        if self.user_vk and self.object:
+            ctx['baby_history'] = self.baby_history(self.object)
         return ctx
 
     # https://vk.com/dev/vk_apps_docs3?f=6.%20%D0%9F%D0%B0%D1%80%D0%B0%D0%BC%D0%B5%D1%82%D1%80%D1%8B%20%D0%B7%D0%B0%D0%BF%D1%83%D1%81%D0%BA%D0%B0
