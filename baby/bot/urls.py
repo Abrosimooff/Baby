@@ -3,7 +3,8 @@ from django.urls import path
 
 from bot.base import VkCallback
 from bot.views import SettingsLine, Welcome, AddHistory, AlbumView, EditHistory, HeightView, WeightView, SharingView, \
-    HelpView, SharingGetView, AlbumPrint, PastMonthsView, PastMonthsAddView, ExitView, AlbumPreview, IndexView, VkApp
+    HelpView, SharingGetView, AlbumPrint, PastMonthsView, PastMonthsAddView, ExitView, IndexView, VkApp, \
+    AlbumPrintSecret
 
 urlpatterns = [
     url(r'^$', IndexView.as_view()),
@@ -22,8 +23,10 @@ urlpatterns = [
     path('past/months/add/<int:month>/', PastMonthsAddView.as_view(), name='past_month_add'),
     path('exit', ExitView.as_view(), name='exit'),  # Выход в режим обычного заполнения
     path('vk/callback/', VkCallback.as_view(), name='vk_callback'),
-    path('album/print/<int:baby_pk>/<int:album_pk>/', AlbumPrint.as_view(), name='album_print'),
-    path('<slug:hashids>', AlbumPreview.as_view(), name='album_preview'),
+
+    # path('album/print/<int:baby_pk>/<int:album_pk>/', AlbumPrint.as_view(), name='album_print'),
+    path('<slug:hashids>', AlbumPrintSecret.as_view(), name='album_print_secret'),
+    # path('<slug:hashids>', AlbumPreview.as_view(), name='album_preview'),
 
     path('vk/app/', VkApp.as_view(), name='vk_app'),
 ]

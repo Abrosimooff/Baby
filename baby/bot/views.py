@@ -90,18 +90,9 @@ class AlbumView(BaseLine):
     """ Получить альбом """
 
     def bot_handler(self, request, *args, **kwargs):
-        message = 'Пока продолжайте наполнять альбом, а через месяцок я уже смогу показать, что у нас получается :)'
-
-        if BabyHistory.objects.filter(baby=self.user_vk.baby).count() > 10:
-            hashids_code = hashids.Hashids().encode(self.user_vk.user_vk_id, self.user_vk.baby.id, 1)
-            href = urljoin(base='http://' + CURRENT_HOST, url=reverse('album_preview', args=[hashids_code]))
-            message = 'Когда закончите заполнять альбом, тогда я сформирую для вас готовый вариант.\n\n' \
-                      'А пока поделюсь с вами ссылкой на последние страницы альбома.\n' \
-                      '{}'.format(href)
-
         self.request.vk_api.messages.send(
             user_id=self.user_vk.user_vk_id,
-            message=message,
+            message='Ссылка на ваш альбом:\n{}'.format(self.user_vk.album_url),
             random_id=random.randint(0, 10000000),
             keyboard=json.dumps(DEFAULT_KEYBOARD)
         )
@@ -748,42 +739,61 @@ class AlbumPrint(BabyHistoryMix, DetailView):
         return ctx
 
 
-class AlbumPreview(BabyHistoryMix, TemplateView):
-    """ Показать превьюшку альбома """
-    hash_params = ['user_vk_id', 'baby_id', 'album_id']
-    hash_values = {}
+class AlbumPrintSecret(AlbumPrint):
+    """ Ссылка на альбом """
+    hash_params = ['user_vk_id', 'baby_pk', 'album_pk']
 
     def get(self, request, *args, **kwargs):
         codes = hashids.Hashids().decode(self.kwargs.get('hashids'))
         if codes and len(codes) == len(self.hash_params):
-            self.hash_values = dict(zip(self.hash_params, codes))
+            self.kwargs = dict(zip(self.hash_params, codes))
             return super().get(request, *args, **kwargs)
         return HttpResponseNotFound()
 
-    def get_template_names(self):
-        return 'bot/preview/preview{}_landscape.jinja2'.format(self.hash_values['album_id'])
-
     @cached_property
     def baby(self):
-        return Baby.objects.filter(pk=self.hash_values['baby_id']).first()
+        return Baby.objects.filter(pk=self.kwargs['baby_pk']).first()
 
-    def message_qs(self, baby):
-        return sorted(BabyHistory.objects.select_related('baby').filter(baby=baby).order_by('-date_vk')[:5], key=lambda x: x.date_vk)
+    def get_object(self, queryset=None):
+        return self.baby
 
-    def photo_qs(self, baby):
-        return sorted(BabyHistoryAttachment.objects.select_related('history')
-                      .filter(history__baby=baby).order_by('-history__date_vk')[:100],
-                      key=lambda x: x.history.date_vk)
-
-    def measure_qs(self, model, baby):
-        return sorted(model.objects.filter(baby=baby).order_by('-date')[:1], key=lambda x: x.date)
-
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        ctx['baby'] = self.baby
-        ctx['view'] = self
-        ctx['baby_history'] = self.baby_history(self.baby)
-        return ctx
+#
+# class AlbumPreview(BabyHistoryMix, TemplateView):
+#     """ Показать превьюшку альбома """
+#     hash_params = ['user_vk_id', 'baby_id', 'album_id']
+#     hash_values = {}
+#
+#     def get(self, request, *args, **kwargs):
+#         codes = hashids.Hashids().decode(self.kwargs.get('hashids'))
+#         if codes and len(codes) == len(self.hash_params):
+#             self.hash_values = dict(zip(self.hash_params, codes))
+#             return super().get(request, *args, **kwargs)
+#         return HttpResponseNotFound()
+#
+#     def get_template_names(self):
+#         return 'bot/preview/preview{}_landscape.jinja2'.format(self.hash_values['album_id'])
+#
+#     @cached_property
+#     def baby(self):
+#         return Baby.objects.filter(pk=self.hash_values['baby_id']).first()
+#
+#     def message_qs(self, baby):
+#         return sorted(BabyHistory.objects.select_related('baby').filter(baby=baby).order_by('-date_vk')[:5], key=lambda x: x.date_vk)
+#
+#     def photo_qs(self, baby):
+#         return sorted(BabyHistoryAttachment.objects.select_related('history')
+#                       .filter(history__baby=baby).order_by('-history__date_vk')[:100],
+#                       key=lambda x: x.history.date_vk)
+#
+#     def measure_qs(self, model, baby):
+#         return sorted(model.objects.filter(baby=baby).order_by('-date')[:1], key=lambda x: x.date)
+#
+#     def get_context_data(self, **kwargs):
+#         ctx = super().get_context_data(**kwargs)
+#         ctx['baby'] = self.baby
+#         ctx['view'] = self
+#         ctx['baby_history'] = self.baby_history(self.baby)
+#         return ctx
 
 
 class PastMonthsView(BaseLine):

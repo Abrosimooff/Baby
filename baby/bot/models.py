@@ -1,10 +1,14 @@
 import datetime
 import json
+from urllib.parse import urljoin
 
+import hashids
 from django.db import models
 from django.db.models import CASCADE
+from django.urls import reverse
 from django.utils.functional import cached_property
 
+from baby.settings import CURRENT_HOST
 from bot.models_utils.jsonfield import JSONField
 from bot.helpers import DateUtil
 
@@ -40,6 +44,13 @@ class UserVK(models.Model):
     def baby(self):
         """ Ребёнок пользователя, если есть """
         return Baby.objects.filter(babyuservk__user_vk=self).first()
+
+    @cached_property
+    def album_url(self):
+        if self.baby:
+            hashids_code = hashids.Hashids().encode(self.user_vk_id, self.baby.id, 1)
+            return urljoin(base='http://' + CURRENT_HOST, url=reverse('album_print_secret', args=[hashids_code]))
+        return 'http://' + CURRENT_HOST
 
     @property
     def baby2user(self):

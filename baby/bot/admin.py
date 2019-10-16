@@ -3,11 +3,15 @@ from bot.models import *
 
 
 class UserVKAdmin(admin.ModelAdmin):
-    list_display = ['first_name', 'last_name', 'id', 'url', 'wait_payload']
+    list_display = ['first_name', 'last_name', 'id', 'url', 'album_url', 'wait_payload']
     list_filter = ['first_name', 'last_name']
 
     def url(self, obj):
         return obj.vk_url
+
+    def album_url(self, obj):
+        return obj.album_url
+    album_url.short_description = 'URL альбома'
 
 
 class BabyAdmin(admin.ModelAdmin):
