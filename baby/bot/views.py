@@ -746,14 +746,22 @@ class AlbumPrint(BabyHistoryMix, DetailView):
 
 class AlbumPrintSecret(AlbumPrint):
     """ Ссылка на альбом """
-    hash_params = ['user_vk_id', 'baby_pk', 'album_pk']
+    hash_params = ['user_vk_id', 'baby_pk']
+    hash_params_old = ['user_vk_id', 'baby_pk', 'album_pk']
 
     def get(self, request, *args, **kwargs):
         codes = hashids.Hashids().decode(self.kwargs.get('hashids'))
         if codes and len(codes) == len(self.hash_params):
             self.kwargs = dict(zip(self.hash_params, codes))
             return super().get(request, *args, **kwargs)
+        # для поддержки ссылок по-старому
+        if codes and len(codes) == len(self.hash_params_old):
+            self.kwargs = dict(zip(self.hash_params_old, codes))
+            return super().get(request, *args, **kwargs)
         return HttpResponseNotFound()
+
+    def get_template_names(self):
+        return 'bot/albums/landscape/{}.jinja2'.format(self.album_pk)
 
     @cached_property
     def user_vk(self):
@@ -766,7 +774,6 @@ class AlbumPrintSecret(AlbumPrint):
             album = dict(
                 pk=album_pk,
                 name='Альбом #{}'.format(album_pk),
-                link=self.user_vk.get_album_url(album_pk=album_pk),
                 background_url='/static/img/albums/{}/bg.jpg'.format(album_pk),
             )
             album_list.append(album)
@@ -781,12 +788,20 @@ class AlbumPrintSecret(AlbumPrint):
 
     @cached_property
     def album_pk(self):
-        return self.kwargs['album_pk']
+        try:
+            album_pk = int(self.request.GET.get('album'))
+        except:
+            album_pk = self.user_vk.album_pk
+
+        if album_pk not in ALBUM_IDS:
+            album_pk = 1
+        return album_pk
 
     def get_context_data(self, **kwargs):
         # Сохраняем ID альбома, на который пользователь перешёл
-        self.user_vk.album_pk = self.album_pk
-        self.user_vk.save()
+        if self.album_pk != self.user_vk.album_pk:
+            self.user_vk.album_pk = self.album_pk
+            self.user_vk.save()
         return super().get_context_data(**kwargs)
 
 

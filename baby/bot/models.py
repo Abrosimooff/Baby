@@ -53,11 +53,8 @@ class UserVK(models.Model):
 
     @cached_property
     def album_url(self):
-        return self.get_album_url(self.album_pk)
-
-    def get_album_url(self, album_pk):
         if self.baby:
-            hashids_code = hashids.Hashids().encode(self.user_vk_id, self.baby.id, album_pk)
+            hashids_code = hashids.Hashids().encode(self.user_vk_id, self.baby.id)
             return urljoin(base='http://' + CURRENT_HOST, url=reverse('album_print_secret', args=[hashids_code]))
         return 'http://' + CURRENT_HOST
 
