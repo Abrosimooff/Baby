@@ -12,8 +12,9 @@ from baby.settings import CURRENT_HOST
 from bot.models_utils.jsonfield import JSONField
 from bot.helpers import DateUtil
 
-ALBUM_COUNT = 3
+ALBUM_COUNT = 4
 ALBUM_IDS = range(1, ALBUM_COUNT + 1)
+
 
 class UserVK(models.Model):
     """ Информация о пользователе ВК """
