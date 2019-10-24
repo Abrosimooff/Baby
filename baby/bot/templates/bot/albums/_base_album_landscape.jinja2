@@ -61,7 +61,7 @@
     <div class="select-album-block" >
         <h2 style="color: #9d9d9d; font-family: Comfortaa">Выбери свой альбом</h2>
         {% for album_data in view.album_list %}
-            <a class="select-album" href="{{ album_data.link }}" style="background-size: cover; background-image: url('{{ album_data.background_url }}')">
+            <a class="select-album {% if album_data.pk == view.album_pk %}current{% endif %}" href="{{ album_data.link }}" style="background-size: cover; background-image: url('{{ album_data.background_url }}')">
                 <div class="select-album-name">
                     <div class="select-album-name-label">
                         {{ album_data.name }}

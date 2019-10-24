@@ -12,13 +12,18 @@ from baby.settings import CURRENT_HOST
 from bot.models_utils.jsonfield import JSONField
 from bot.helpers import DateUtil
 
+ALBUM_COUNT = 3
+ALBUM_IDS = range(1, ALBUM_COUNT + 1)
 
 class UserVK(models.Model):
     """ Информация о пользователе ВК """
+    ALBUM_CHOICES = [(album_pk, 'Альбом #{}'.format(album_pk)) for album_pk in ALBUM_IDS]
+
     first_name = models.CharField(max_length=200, verbose_name='Имя', blank=True)
     last_name = models.CharField(max_length=200, verbose_name='Фамилия', blank=True)
     user_vk_id = models.IntegerField(verbose_name=u'ID пользователя ВК')
     wait_payload = JSONField(null=True, blank=True, verbose_name=u'Инфо об ожидаемом ответе')
+    album_pk = models.PositiveSmallIntegerField(verbose_name=u'Выбраный альбом', default=1, choices=ALBUM_CHOICES)
 
     class Meta:
         verbose_name = ' Пользователь ВК'
@@ -47,7 +52,7 @@ class UserVK(models.Model):
 
     @cached_property
     def album_url(self):
-        return self.get_album_url(1)
+        return self.get_album_url(self.album_pk)
 
     def get_album_url(self, album_pk):
         if self.baby:

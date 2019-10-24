@@ -15,7 +15,8 @@ from django.views.generic import TemplateView, DetailView
 from baby.settings import CURRENT_HOST
 from bot.base import BaseLine, DEFAULT_KEYBOARD
 from bot.helpers import DateUtil
-from bot.models import UserVK, Baby, BabyUserVK, BabyHistory, BabyHistoryAttachment, AttachType, BabyHeight, BabyWeight
+from bot.models import UserVK, Baby, BabyUserVK, BabyHistory, BabyHistoryAttachment, AttachType, \
+    BabyHeight, BabyWeight, ALBUM_IDS
 from bot.utils.album import AlbumPager
 from bot.validators import ValidateGenderList, FirstNameValidate, ValidateYearList, ValidateMonthList, \
     ValidateBirthDate, HeightValidate, WeightValidate
@@ -746,7 +747,6 @@ class AlbumPrint(BabyHistoryMix, DetailView):
 class AlbumPrintSecret(AlbumPrint):
     """ Ссылка на альбом """
     hash_params = ['user_vk_id', 'baby_pk', 'album_pk']
-    album_count = 3
 
     def get(self, request, *args, **kwargs):
         codes = hashids.Hashids().decode(self.kwargs.get('hashids'))
@@ -762,8 +762,9 @@ class AlbumPrintSecret(AlbumPrint):
     @cached_property
     def album_list(self):
         album_list = []
-        for album_pk in range(1, self.album_count + 1):
+        for album_pk in ALBUM_IDS:
             album = dict(
+                pk=album_pk,
                 name='Альбом #{}'.format(album_pk),
                 link=self.user_vk.get_album_url(album_pk=album_pk),
                 background_url='/static/img/albums/{}/bg.jpg'.format(album_pk),
@@ -777,6 +778,17 @@ class AlbumPrintSecret(AlbumPrint):
 
     def get_object(self, queryset=None):
         return self.baby
+
+    @cached_property
+    def album_pk(self):
+        return self.kwargs['album_pk']
+
+    def get_context_data(self, **kwargs):
+        # Сохраняем ID альбома, на который пользователь перешёл
+        self.user_vk.album_pk = self.album_pk
+        self.user_vk.save()
+        return super().get_context_data(**kwargs)
+
 
 #
 # class AlbumPreview(BabyHistoryMix, TemplateView):

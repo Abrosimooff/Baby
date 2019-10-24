@@ -3,7 +3,7 @@ from bot.models import *
 
 
 class UserVKAdmin(admin.ModelAdmin):
-    list_display = ['first_name', 'last_name', 'id', 'url', 'album_url', 'wait_payload']
+    list_display = ['first_name', 'last_name', 'id', 'url', 'album_pk', 'album_url', 'wait_payload']
     list_filter = ['first_name', 'last_name']
 
     def url(self, obj):
