@@ -9,8 +9,9 @@
     <style>
 
     body{
-        background-image: url("/static/img/albums/1/bg.jpg");
-        background-position: right;
+        background-image: url("/static/img/albums/{{ user_vk.album_pk }}/bg.jpg");
+        background-repeat: no-repeat;
+        background-attachment: fixed;
     }
 
     .page {
@@ -25,19 +26,21 @@
 
     .data div{ font-size: 22px!important; text-align: center}
     .data .first_name{ font-size: 30px!important;}
-    .subpage{ width: 400px; margin: 0 auto; background-color: rgba(255, 255, 255, 0.4);
+    .subpage{ width: 400px; margin: 0 auto; background-color: rgba(255, 255, 255, 0.95);
         padding: 20px; border-radius: 10px;
     }
     .month{text-align: center; font-size: 20px;}
     .text{background-color: rgba(255, 255, 255, 0.9); padding: 10px; max-width: 300px; margin: 10px;
-        border-radius: 15px 15px 15px 0px}
+        border-radius: 15px 15px 15px 0px; box-shadow: 0px 0px 3px #cacaca
+    }
     .text .date{font-size: 10px; margin-bottom: 10px;}
 
     .photo-wrap{height: 200px; width: 200px; border-radius: 10px; margin: 10px auto;}
     .title{background-color: rgba(255, 255, 255, 0.9);
         padding: 10px; width: auto; max-width: 200px; margin: 0px 10px 10px 180px; font-size: 10px;
         display: inline-block;
-        border-radius: 0px 15px 15px 15px}
+        border-radius: 0px 15px 15px 15px; box-shadow: 0px 0px 3px #cacaca
+    }
 
     .height{margin: 10px 10px 10px 100px;}
     .height-icon{display: inline-block; font-size: 40px;}
@@ -99,3 +102,5 @@
             </div>
     </div>
 {% endblock %}
+
+{% block select_album %}{% endblock %}
