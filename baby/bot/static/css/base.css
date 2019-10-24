@@ -11,3 +11,41 @@
 }
 .color1{color: #8acef5}
 .color2{color: #e4eff3}
+
+.select-album-block{ display: block; text-align: center;}
+
+.select-album{
+    display: inline-block; margin: 20px; width: 250px; height: 150px; border-radius: 10px; text-decoration: none;
+    box-shadow: 3px 3px 5px #acacac;
+}
+.select-album:hover{box-shadow: 3px 3px 15px #acacac;}
+
+.select-album-name-label{
+    display: inline-block;
+    margin-top: 50px; background-color: rgba(255, 255, 255, 0.9); line-height: 30px;
+    padding: 10px 20px; border-radius: 5px;
+    box-shadow: 0px 0px 3px #cdcdcd;
+}
+
+.select-album-name{
+    font-family: Comfortaa;
+    border-radius: 10px;
+    color: #333; font-size: 20px;
+    display: inline-block;
+    margin: 0; padding: 0; height: 100%; width: 100%;
+    line-height: 150px;
+
+}
+
+.select-album-name:hover{
+    background-color: rgba(255, 255, 255, 0.7);
+}
+.select-album-name:hover .select-album-name-label{
+    background: none; box-shadow: none;
+}
+.print-btn{
+    display: inline-block; padding: 20px;
+    font-family: Comfortaa;
+    background-color: #8acef5; color: #fff; cursor: pointer; border-radius: 5px;
+}
+.print-btn:hover{ background-color: #84c5ea;}

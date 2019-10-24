@@ -398,6 +398,7 @@ class AddHistory(BaseLine):
         self.message_id = request.message.id
         self.message_text = request.message.text
         self.photo_list = request.message.photo_list
+        self.small_photo_count = request.message.small_photo_count
         if not self.photo_list:  # Если нет фоток, то собираем текст (вдруг есть перисланные сообщения)
             self.message_text = request.message.all_text
         self.other_attach_exist = request.message.other_attach_exists
@@ -426,6 +427,9 @@ class AddHistory(BaseLine):
                 msg = u'Ок. Получил ваши фото ({}шт){}.'.format(len(self.photo_list), ' и описание' if self.message_text else '')
             elif self.message_text:
                 msg = u'Ок. Информацию принял.'
+            if self.small_photo_count:
+                msg += '\nВнимание! Вы прикрепили фото маленького размера ({}шт).\n' \
+                       'Такие фото в альбом не принимаются :('.format(self.small_photo_count)
 
             if self.other_attach_exist:
                 msg += '\nИз вложений мы принимаем только фото!'
@@ -742,6 +746,7 @@ class AlbumPrint(BabyHistoryMix, DetailView):
 class AlbumPrintSecret(AlbumPrint):
     """ Ссылка на альбом """
     hash_params = ['user_vk_id', 'baby_pk', 'album_pk']
+    album_count = 3
 
     def get(self, request, *args, **kwargs):
         codes = hashids.Hashids().decode(self.kwargs.get('hashids'))
@@ -749,6 +754,22 @@ class AlbumPrintSecret(AlbumPrint):
             self.kwargs = dict(zip(self.hash_params, codes))
             return super().get(request, *args, **kwargs)
         return HttpResponseNotFound()
+
+    @cached_property
+    def user_vk(self):
+        return UserVK.objects.filter(user_vk_id=self.kwargs['user_vk_id']).first()
+
+    @cached_property
+    def album_list(self):
+        album_list = []
+        for album_pk in range(1, self.album_count + 1):
+            album = dict(
+                name='Альбом #{}'.format(album_pk),
+                link=self.user_vk.get_album_url(album_pk=album_pk),
+                background_url='/static/img/albums/{}/bg.jpg'.format(album_pk),
+            )
+            album_list.append(album)
+        return album_list
 
     @cached_property
     def baby(self):

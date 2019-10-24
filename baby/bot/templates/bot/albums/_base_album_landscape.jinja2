@@ -57,6 +57,23 @@
 </head>
 <body>
 {% if baby %}
+    {% block select_album %}
+    <div class="select-album-block" >
+        <h2 style="color: #9d9d9d; font-family: Comfortaa">Выбери свой альбом</h2>
+        {% for album_data in view.album_list %}
+            <a class="select-album" href="{{ album_data.link }}" style="background-size: cover; background-image: url('{{ album_data.background_url }}')">
+                <div class="select-album-name">
+                    <div class="select-album-name-label">
+                        {{ album_data.name }}
+                    </div>
+                </div>
+            </a>
+        {% endfor %}
+        <h4 style="color: #9d9d9d; font-family: Comfortaa">Печать альбома рекоммендавана из браузера
+            <a class="color1" target="_blank" href="https://www.google.ru/intl/ru/chrome/">Google Chrome</a></h4>
+        <h4><a class="print-btn" onclick="window.print()">Распечатать альбом</a></h4>
+    </div>
+    {% endblock %}
     {% block album %}
         <div class="album {% if baby.is_women %}women{% else %}men{% endif %}">
             {% block first_page %}

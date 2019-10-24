@@ -250,12 +250,11 @@ class Message(object):
     """ Обёртка для сообщения """
     message = None
     vk_api = None
+    small_photo_count = 0
 
     def __init__(self, message_id, vk_api):
         self.vk_api = vk_api
         self.message = self.vk_api.messages.getById(message_ids=message_id)
-        # print('MESSAGE:', self.item)
-
 
     @cached_property
     def item(self):
@@ -296,11 +295,15 @@ class Message(object):
     @cached_property
     def photo_list(self):
         """ Список вложенных фото """
-        good_sizes = ['w', 'z', 'y']  # Размеры изображения, которые нас интересуют (от большего к меньшему)
+        # https://vk.com/dev/photo
+        good_sizes = ['w', 'z', 'y', 'x']  # Размеры изображения, которые нас интересуют (от большего к меньшему)
         url_list = []
+        photo_count = 0
+        self.is_small_photo = False
         for item in self.attachment_list:
             size_dict = dict()
             if item['type'] == AttachType.PHOTO:
+                photo_count += 1
                 for s in item[AttachType.PHOTO]['sizes']:
                     size_dict[s['type']] = s['url']
                 for size in good_sizes:
@@ -308,6 +311,7 @@ class Message(object):
                     if url:
                         url_list.append(url)
                         break
+        self.small_photo_count = photo_count - len(url_list)   # Количество фото, что не прошли good_sizes (маленькие)
         return url_list
 
     @cached_property
