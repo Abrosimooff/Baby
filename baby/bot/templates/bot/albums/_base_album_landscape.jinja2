@@ -92,6 +92,54 @@
                 </div>
             {% endblock first_page %}
 
+            {% if height_chart %}
+                <div class="page">
+                    <div class="subpage">
+                        <div class="height-chart">
+                            <h4 class="height-chart-text">А вот как растёт наш{% if baby.is_women %}а{% endif %} {{ baby.first_name }} <span class="icon-up"></span></h4>
+                            {% for item in height_chart %}
+                                <div class="height-chart-item">
+                                    <div class="height-chart-column" style="height: {{ item.mm }}mm;">
+                                        <span>{{ item.height }} см</span>
+                                    </div>
+                                    <div class="height-chart-caption">
+                                        {{ item.date|date('j') }}<br>
+                                        {{ item.date|date('E') }}<br>
+                                        {{ item.date|date('Y') }}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="page-num-center">{{ view.page_num }}</div>
+                    {{ view.page_num_add() }}
+                </div>
+            {% endif %}
+
+            {% if weight_chart %}
+                <div class="page">
+                    <div class="subpage">
+                        <div class="weight-chart">
+                            <h4 class="weight-chart-text">{{ baby.first_name }} набирает вес</h4>
+                            {% for item in weight_chart %}
+                                <div class="weight-chart-item">
+                                    <div class="weight-chart-column" style="height: {{ item.mm }}mm;">
+                                        <span>{{ item.weight_str }}</span>
+                                    </div>
+                                    <div class="weight-chart-caption">
+                                        {{ item.date|date('j') }}<br>
+                                        {{ item.date|date('E') }}<br>
+                                        {{ item.date|date('Y') }}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="page-num-center">{{ view.page_num }}</div>
+                    {{ view.page_num_add() }}
+                </div>
+            {% endif %}
+
             {% for h in baby_history %}
                 {% if h.page_list %}
                     <div class="page">

@@ -65,7 +65,29 @@ body {
 .height.pos-right-top, .weight.pos-right-top{top: 3cm;}
 .height.pos-right-bottom, .weight.pos-right-bottom{bottom:3cm;}
 
+.height-chart{ vertical-align: bottom; height: 100%; text-align: center}
+.height-chart-text{position: absolute; bottom: 1cm; left: 25%; color: #8acef5; font-family: 'Neucha', cursive; font-size: 13mm; }
+.height-chart-item{ display: inline-block; vertical-align: bottom}
+.height-chart-column{width: 15mm; margin: 0mm 2mm;
+    background-color: #8acef5;
+    text-align: center; padding: 2mm;
+    border-radius: 2mm 2mm 0mm 0mm;
+    font-family: 'Neucha', cursive; font-size: 4mm;
+}
+.height-chart-caption{width: 15mm; margin: 0mm 2mm; padding: 2mm; height: 15mm;
+    font-family: 'Neucha', cursive; font-size: 3mm; text-align: center; background-color: #fff;}
 
+.weight-chart{ vertical-align: bottom; height: 100%; text-align: center}
+.weight-chart-text{position: absolute; bottom: 1cm; left: 35%; color: #a7d2d6; font-family: 'Neucha', cursive; font-size: 13mm; }
+.weight-chart-item{ display: inline-block; vertical-align: bottom}
+.weight-chart-column{width: 15mm; margin: 0mm 2mm;
+    background-color: #a7d2d6;
+    text-align: center; padding: 2mm;
+    border-radius: 2mm 2mm 0mm 0mm;
+    font-family: 'Neucha', cursive; font-size: 4mm;
+}
+.weight-chart-caption{width: 15mm; margin: 0mm 2mm; padding: 2mm; height: 15mm;
+    font-family: 'Neucha', cursive; font-size: 3mm; text-align: center; background-color: #fff;}
 
 
 @page {

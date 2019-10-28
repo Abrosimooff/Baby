@@ -675,6 +675,17 @@ class BabyHistoryMix(object):
     def measure_qs(self, model, baby):
         return model.objects.filter(baby=baby).order_by('date')
 
+    def measure_chart(self, model, baby):
+        """ График роста """
+        measure_list = self.measure_qs(model, baby)
+        if measure_list:
+            step = 120 / len(measure_list)
+            current_mm = 0
+            for item in measure_list:
+                current_mm += step
+                item.mm = current_mm
+        return measure_list
+
     def baby_history(self, baby):
         """ Вся история малыша """
         messages = self.message_qs(baby)
@@ -741,6 +752,8 @@ class AlbumPrint(BabyHistoryMix, DetailView):
         ctx['baby'] = self.object
         ctx['view'] = self
         ctx['baby_history'] = self.baby_history(self.object)
+        ctx['height_chart'] = self.measure_chart(BabyHeight, self.object)
+        ctx['weight_chart'] = self.measure_chart(BabyWeight, self.object)
         return ctx
 
 
