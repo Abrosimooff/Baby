@@ -7,7 +7,7 @@ from urllib.parse import urljoin
 
 import hashids
 import pytz
-from django.http import HttpResponseNotFound
+from django.http import HttpResponseNotFound, HttpResponseRedirect
 from django.urls import resolve, reverse
 from django.utils.functional import cached_property
 from django.views.generic import TemplateView, DetailView
@@ -32,8 +32,14 @@ class IndexView(TemplateView):
 
 
 class VkAuth(IndexView):
-    pass
 
+    def get(self, request, *args, **kwargs):
+        if self.request.GET.get('hash') and self.request.GET.get('uid'):
+            user_vk_id = int(self.request.GET.get('uid'))
+            self.user_vk = UserVK.objects.filter(user_vk_id=user_vk_id).first()
+            if self.user_vk:
+                return HttpResponseRedirect(self.user_vk.album_url)
+        return super(VkAuth, self).get(request, *args, **kwargs)
 
 class Welcome(BaseLine):
     """ Первое приветственное сообщение и перенаправление на настройки|код ребёнка """

@@ -37,14 +37,12 @@
         <a class="btn" target="_blank" href="https://vk.com/ibabybot">Подробнее</a>
     </div>
 
-
     <!-- VK Widget -->
     <div class="vk_auth_wrapper">
         <div id="vk_auth"></div>
     </div>
     <script type="text/javascript">
-      VK.Widgets.Auth("vk_auth", {"width":500,"onAuth":"function(data) {alert('user '+data['uid']+' authorized');}"});
+      VK.Widgets.Auth("vk_auth", {"width":500, authUrl: "{{ url('vk_auth') }}"});
     </script>
-
 </body>
 </html>
