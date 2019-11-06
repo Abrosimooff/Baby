@@ -4,7 +4,7 @@ from django.urls import path
 from bot.base import VkCallback
 from bot.views import SettingsLine, Welcome, AddHistory, AlbumView, EditHistory, HeightView, WeightView, SharingView, \
     HelpView, SharingGetView, AlbumPrint, PastMonthsView, PastMonthsAddView, ExitView, IndexView, VkApp, \
-    AlbumPrintSecret
+    AlbumPrintSecret, VkAuth
 
 urlpatterns = [
     url(r'^$', IndexView.as_view()),
@@ -29,4 +29,5 @@ urlpatterns = [
     # path('<slug:hashids>', AlbumPreview.as_view(), name='album_preview'),
 
     path('vk/app/', VkApp.as_view(), name='vk_app'),
+    path('vk/auth/', VkAuth.as_view(), name='vk_auth'),
 ]

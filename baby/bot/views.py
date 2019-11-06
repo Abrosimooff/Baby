@@ -7,13 +7,13 @@ from urllib.parse import urljoin
 
 import hashids
 import pytz
-from django.http import HttpResponseNotFound
+from django.http import HttpResponseNotFound, HttpResponseRedirect
 from django.urls import resolve, reverse
 from django.utils.functional import cached_property
 from django.views.generic import TemplateView, DetailView
 
 from baby.settings import CURRENT_HOST
-from bot.base import BaseLine, DEFAULT_KEYBOARD
+from bot.base import BaseLine, DEFAULT_KEYBOARD, VK_APP_ID
 from bot.helpers import DateUtil
 from bot.models import UserVK, Baby, BabyUserVK, BabyHistory, BabyHistoryAttachment, AttachType, \
     BabyHeight, BabyWeight, ALBUM_IDS
@@ -25,6 +25,21 @@ from bot.validators import ValidateGenderList, FirstNameValidate, ValidateYearLi
 class IndexView(TemplateView):
     template_name = 'bot/index.jinja2'
 
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['VK_APP_ID'] = VK_APP_ID
+        return ctx
+
+
+class VkAuth(IndexView):
+
+    def get(self, request, *args, **kwargs):
+        if self.request.GET.get('hash') and self.request.GET.get('uid'):
+            user_vk_id = int(self.request.GET.get('uid'))
+            self.user_vk = UserVK.objects.filter(user_vk_id=user_vk_id).first()
+            if self.user_vk:
+                return HttpResponseRedirect(self.user_vk.album_url)
+        return super(VkAuth, self).get(request, *args, **kwargs)
 
 class Welcome(BaseLine):
     """ Первое приветственное сообщение и перенаправление на настройки|код ребёнка """
@@ -688,14 +703,21 @@ class BabyHistoryMix(object):
     def measure_qs(self, model, baby):
         return model.objects.filter(baby=baby).order_by('date')
 
-    def measure_chart(self, model, baby):
+    def measure_chart(self, model, measure_attr, baby):
         """ График роста """
         measure_list = self.measure_qs(model, baby)
+        min_height_mm = 20
+        max_height_mm = 120
+        delta_height_mm = max_height_mm - min_height_mm
         if measure_list:
-            step = 120 / len(measure_list)
-            current_mm = 0
+            for num, item in enumerate(measure_list, 0):
+                item.step = getattr(item, measure_attr) - getattr(measure_list[num-1], measure_attr) if num else 0
+
+            # цена деления = 100мм / сумму всех шагов
+            one_step = delta_height_mm / sum([x.step for x in measure_list])
+            current_mm = min_height_mm
             for item in measure_list:
-                current_mm += step
+                current_mm += item.step * one_step
                 item.mm = current_mm
         return measure_list
 
@@ -765,8 +787,8 @@ class AlbumPrint(BabyHistoryMix, DetailView):
         ctx['baby'] = self.object
         ctx['view'] = self
         ctx['baby_history'] = self.baby_history(self.object)
-        ctx['height_chart'] = self.measure_chart(BabyHeight, self.object)
-        ctx['weight_chart'] = self.measure_chart(BabyWeight, self.object)
+        # ctx['height_chart'] = self.measure_chart(BabyHeight, 'height', self.object)
+        # ctx['weight_chart'] = self.measure_chart(BabyWeight, 'weight', self.object)
         return ctx
 
 

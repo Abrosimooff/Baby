@@ -66,7 +66,11 @@ body {
 .height.pos-right-bottom, .weight.pos-right-bottom{bottom:3cm;}
 
 .height-chart{ vertical-align: bottom; height: 100%; text-align: center}
-.height-chart-text{position: absolute; bottom: 1cm; left: 25%; color: #8acef5; font-family: 'Neucha', cursive; font-size: 13mm; }
+.height-chart-text{
+    position: absolute; bottom: 1cm; left: 0; width:100%;
+    text-align: center; font-family: 'Neucha', cursive; font-size: 13mm;
+    color: #8acef5;
+}
 .height-chart-item{ display: inline-block; vertical-align: bottom}
 .height-chart-column{width: 15mm; margin: 0mm 2mm;
     background-color: #8acef5;
@@ -78,7 +82,11 @@ body {
     font-family: 'Neucha', cursive; font-size: 3mm; text-align: center; background-color: #fff;}
 
 .weight-chart{ vertical-align: bottom; height: 100%; text-align: center}
-.weight-chart-text{position: absolute; bottom: 1cm; left: 35%; color: #a7d2d6; font-family: 'Neucha', cursive; font-size: 13mm; }
+.weight-chart-text{
+    position: absolute; bottom: 1cm; left: 0; width:100%;
+    text-align: center; font-family: 'Neucha', cursive; font-size: 13mm;
+    color: #a7d2d6;
+}
 .weight-chart-item{ display: inline-block; vertical-align: bottom}
 .weight-chart-column{width: 15mm; margin: 0mm 2mm;
     background-color: #a7d2d6;

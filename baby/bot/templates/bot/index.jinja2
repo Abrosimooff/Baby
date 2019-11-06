@@ -5,12 +5,17 @@
     <title>Альбом младенца. Бот</title>
     <link rel="stylesheet" href="/static/css/base.css">
     <link href="https://fonts.googleapis.com/css?family=Caveat|Neucha|Comfortaa&display=swap" rel="stylesheet">
-     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.2/animate.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.2/animate.min.css">
+
+    <script type="text/javascript" src="https://vk.com/js/api/openapi.js?162"></script>
+    <script type="text/javascript">VK.init({apiId: {{ VK_APP_ID }} });</script>
+
     <style>
         body{
             background-image: url("/static/img/index_bg.jpg");
             background-size: cover;
         }
+        .vk_auth_wrapper{margin: 50px auto; width: 500px;}
         .font{font-family: 'Caveat'}
         .btn{
             transition: background-color 0.5s;
@@ -32,5 +37,12 @@
         <a class="btn" target="_blank" href="https://vk.com/ibabybot">Подробнее</a>
     </div>
 
+    <!-- VK Widget -->
+    <div class="vk_auth_wrapper">
+        <div id="vk_auth"></div>
+    </div>
+    <script type="text/javascript">
+      VK.Widgets.Auth("vk_auth", {"width":500, authUrl: "{{ url('vk_auth') }}"});
+    </script>
 </body>
 </html>
