@@ -338,6 +338,7 @@ class VkHelp(object):
     vk_session = None
     is_longpoll = False
     # https://vk.com/dev/emoji
+    # https://k-94.ru/p/emoji/
 
     def __init__(self, is_longpoll=False):
         self.is_longpoll = is_longpoll

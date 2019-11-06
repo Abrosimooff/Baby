@@ -61,6 +61,18 @@ class Welcome(BaseLine):
                                                  first_name=user_data[0]['first_name'],
                                                  last_name=user_data[0]['last_name'],
                                                  )
+            policy_msg = "Добро пожаловать в чат-бот для создания первого альбома малыша. &#128118;\n" \
+                         "Данные, которые вы будете отправлять боту - " \
+                         "будут использоваться только для создания вашего альбома!\n" \
+                         "По закону РФ, рассказываю, что прочитать о политике обработке " \
+                         "персональных данных можно здесь: https://vk.com/dev/uprivacy\n" \
+                         "Далее, начиная работу по созданию альбома, " \
+                         "Вы соглашаетесь с политикой обработки персональных данных."
+            request.vk_api.messages.send(
+                user_id=self.user_vk.user_vk_id,
+                message=policy_msg,
+                random_id=random.randint(0, 10000000)
+            )
 
         if not self.user_vk.baby:
             self.user_vk.wait_payload = dict(action='/welcome')  # если чувак не нажмёт на кнопку, то будет /welcome
@@ -68,7 +80,7 @@ class Welcome(BaseLine):
             request.vk_api.messages.send(
                 user_id=self.user_vk.user_vk_id,
                 keyboard=json.dumps(self.keyboard),
-                message='Привет. Начнём создавать альбом для твоего ребёнка :)\n'
+                message='Начнём создавать альбом для твоего ребёнка :)\n'
                         'Если стобой поделились кодом ребёнка - жми "Код ребёнка".\n'
                         'Если будем заводить новый альбом - жми "Новый альбом"',
                 random_id=random.randint(0, 10000000)
@@ -78,6 +90,7 @@ class Welcome(BaseLine):
             self.user_vk.save()
             request.vk_api.messages.send(
                 user_id=self.user_vk.user_vk_id,
+                keyboard=json.dumps(self.keyboard),
                 message='Продолжайте вести ваш альбом :)',
                 random_id=random.randint(0, 10000000)
             )
@@ -945,7 +958,7 @@ class ExitView(BaseLine):
         self.request.vk_api.messages.send(
             user_id=self.user_vk.user_vk_id,
             message=u'Готово.\n'
-                    u'Можете дальше продолжать вести свой альбом в обычном режиме :)',
+                    u'Можете дальше продолжать вести свой альбом в обычном режиме &#128522;',
             random_id=random.randint(0, 10000000),
             keyboard=json.dumps(DEFAULT_KEYBOARD)
         )
