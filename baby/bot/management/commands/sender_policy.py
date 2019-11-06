@@ -21,12 +21,12 @@ class Command(BaseCommand):
                   'Вы соглашаетесь с политикой обработки персональных данных.\n\n' \
                   'Можете дальше продолжать вести свой альбом в обычном режиме &#128522;'
 
-        for user_vk in UserVK.objects.all():
-            user_vk.wait_payload = None
-            user_vk.save()
-            VkHelp().vk_api.messages.send(
-                user_id=user_vk.user_vk_id,
-                message=message,
-                random_id=random.randint(0, 10000000),
-                keyboard=json.dumps(DEFAULT_KEYBOARD)
-            )
+        # for user_vk in UserVK.objects.all():
+        #     user_vk.wait_payload = None
+        #     user_vk.save()
+        #     VkHelp().vk_api.messages.send(
+        #         user_id=user_vk.user_vk_id,
+        #         message=message,
+        #         random_id=random.randint(0, 10000000),
+        #         keyboard=json.dumps(DEFAULT_KEYBOARD)
+        #     )
