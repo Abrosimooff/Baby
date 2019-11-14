@@ -60,8 +60,10 @@ class AlbumPhotoEdit(UpdateView):
     pk_url_kwarg = 'photo_id'
 
     def get_queryset(self):
+        if self.request.user.is_staff:
+            return BabyHistoryAttachment.objects.all()
         user_vk = UserVK.objects.filter(user=self.request.user).first()
-        if user_vk or self.request.user.is_staff:
+        if user_vk:
             return BabyHistoryAttachment.objects.filter(history__user_vk=user_vk)
         return BabyHistoryAttachment.objects.none()
 
