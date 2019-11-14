@@ -36,7 +36,6 @@
     display: inline-block;
     margin: 0; padding: 0; height: 100%; width: 100%;
     line-height: 130px;
-
 }
 
 .select-album-name:hover{
@@ -50,4 +49,8 @@
     font-family: Comfortaa;
     background-color: #8acef5; color: #fff; cursor: pointer; border-radius: 5px;
 }
-.print-btn:hover{ background-color: #84c5ea;}
+.print-btn:hover{ background-color: #84c5ea; }
+
+.user-panel{ border-bottom: 2px solid #f4f4f4; text-align: right;}
+.user-panel .item{ display: inline-block; font-size: 14px; font-family: Comfortaa; padding: 20px;}
+.user-panel .item a{ color: inherit; text-decoration: none}

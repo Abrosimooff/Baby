@@ -4,10 +4,12 @@ from django.urls import path
 from bot.base import VkCallback
 from bot.views import SettingsLine, Welcome, AddHistory, AlbumView, EditHistory, HeightView, WeightView, SharingView, \
     HelpView, SharingGetView, AlbumPrint, PastMonthsView, PastMonthsAddView, ExitView, IndexView, VkApp, \
-    AlbumPrintSecret, VkAuth
+    AlbumPrintSecret, VkAuth, logout
 
 urlpatterns = [
-    url(r'^$', IndexView.as_view()),
+    path('', IndexView.as_view(), name='index'),
+    path('logout/', logout, name='logout'),  # Выйти из профиля
+
     url(r'^welcome', Welcome.as_view()),
     url(r'^settings/(?P<question_pk>.+)/', SettingsLine.as_view()),
     url(r'^add_history', AddHistory.as_view()),

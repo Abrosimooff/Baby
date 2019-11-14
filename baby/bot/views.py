@@ -7,6 +7,7 @@ from urllib.parse import urljoin
 
 import hashids
 import pytz
+from django.contrib import auth
 from django.contrib.auth.models import User
 from django.http import HttpResponseNotFound, HttpResponseRedirect
 from django.urls import resolve, reverse
@@ -23,6 +24,11 @@ from bot.validators import ValidateGenderList, FirstNameValidate, ValidateYearLi
     ValidateBirthDate, HeightValidate, WeightValidate
 
 
+def logout(request):
+    auth.logout(request)
+    return HttpResponseRedirect(reverse('index'))
+
+
 class IndexView(TemplateView):
     template_name = 'bot/index.jinja2'
 
@@ -34,13 +40,20 @@ class IndexView(TemplateView):
 
 class VkAuth(IndexView):
 
+    def auth_user(self, user):
+        from django.contrib.auth import login as auth_login, get_backends
+        for backend in get_backends():
+            user.backend = "%s.%s" % (backend.__module__, backend.__class__.__name__)
+        auth_login(self.request, user)
+
     def get(self, request, *args, **kwargs):
         if self.request.GET.get('hash') and self.request.GET.get('uid'):
             user_vk_id = int(self.request.GET.get('uid'))
             self.user_vk = UserVK.objects.filter(user_vk_id=user_vk_id).first()
-            if self.user_vk:
+            if self.user_vk and self.user_vk.user:
+                self.auth_user(self.user_vk.user)
                 return HttpResponseRedirect(self.user_vk.album_url)
-        return super(VkAuth, self).get(request, *args, **kwargs)
+        return HttpResponseRedirect(reverse('index'))
 
 class Welcome(BaseLine):
     """ Первое приветственное сообщение и перенаправление на настройки|код ребёнка """
@@ -818,6 +831,10 @@ class AlbumPrintSecret(AlbumPrint):
 
     def get_template_names(self):
         return 'bot/albums/landscape/{}.jinja2'.format(self.album_pk)
+
+    @cached_property
+    def user(self):
+        return self.request.user
 
     @cached_property
     def user_vk(self):
