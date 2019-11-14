@@ -7,6 +7,7 @@ from urllib.parse import urljoin
 
 import hashids
 import pytz
+from django.contrib.auth.models import User
 from django.http import HttpResponseNotFound, HttpResponseRedirect
 from django.urls import resolve, reverse
 from django.utils.functional import cached_property
@@ -72,10 +73,17 @@ class Welcome(BaseLine):
         if not self.user_vk:
             # Отправляем первое сообщение
             user_data = request.vk_api.users.get(user_ids=request.message.user_id)
-            self.user_vk = UserVK.objects.create(user_vk_id=request.message.user_id,
+
+            dj_user = User.objects.create_user(str(request.message.user_id))  # username = vk id, без пароля
+            dj_user.first_name = user_data[0]['first_name']
+            dj_user.last_name = user_data[0]['last_name']
+            dj_user.save()
+            self.user_vk = UserVK.objects.create(user=dj_user,
+                                                 user_vk_id=request.message.user_id,
                                                  first_name=user_data[0]['first_name'],
                                                  last_name=user_data[0]['last_name'],
                                                  )
+
             policy_msg = "Добро пожаловать в чат-бот для создания первого альбома малыша. &#128118;\n" \
                          "Данные, которые вы будете отправлять боту - " \
                          "будут использоваться только для создания вашего альбома!\n" \
@@ -633,7 +641,7 @@ class SettingsLine(BaseLine):
                     message += 'У вас малыш {} и ему сейчас {}.'.format(self.user_vk.baby.first_name, delta_str)
                 context = dict(first_name=self.user_vk.baby.first_name, a='а' if self.user_vk.baby.is_women else '')
                 welcome_text = \
-                    '\n\nСпасибо, что решили создать Альбом - когда {first_name} вырастет - он{a} точно оценит;)\n\n'\
+                    '\n\nСпасибо, что решили создать Альбом - когда {first_name} подрастёт - он{a} точно оценит;)\n\n'\
                     'Далее -  уделите время раз в неделю/месяц и присылайте фотографии,'\
                     'пишите сообщения, рассказывайте о новых эмоциях, реакциях, умениях, интересах ребёнка.\n'\
                     'В общем, описывайте всё, что хотите увидеть в будущем альбоме вашего ребёнка :)\n'\

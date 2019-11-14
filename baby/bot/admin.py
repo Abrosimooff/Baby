@@ -3,11 +3,21 @@ from bot.models import *
 
 
 class UserVKAdmin(admin.ModelAdmin):
-    list_display = ['first_name', 'last_name', 'id', 'url', 'album_pk', 'album_url', 'wait_payload']
+    list_display = ['full_name', 'username', 'id', 'url', 'album_pk', 'album_url', 'wait_payload']
     list_filter = ['first_name', 'last_name']
 
     def url(self, obj):
         return obj.vk_url
+
+    def full_name(self, obj):
+        return '{} {}'.format(obj.first_name, obj.last_name)
+    full_name.short_description = 'Пользователь'
+
+    def username(self, obj):
+        if obj.user:
+            return obj.user.username
+        return ''
+    username.short_description = 'Имя пользователя'
 
     def album_url(self, obj):
         return obj.album_url

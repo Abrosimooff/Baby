@@ -3,6 +3,7 @@ import json
 from urllib.parse import urljoin
 
 import hashids
+from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import CASCADE
 from django.urls import reverse
@@ -20,6 +21,7 @@ class UserVK(models.Model):
     """ Информация о пользователе ВК """
     ALBUM_CHOICES = [(album_pk, 'Альбом #{}'.format(album_pk)) for album_pk in ALBUM_IDS]
 
+    user = models.ForeignKey(User, verbose_name='Пользователь', null=True, blank=True, on_delete=CASCADE)
     first_name = models.CharField(max_length=200, verbose_name='Имя', blank=True)
     last_name = models.CharField(max_length=200, verbose_name='Фамилия', blank=True)
     user_vk_id = models.IntegerField(verbose_name=u'ID пользователя ВК')
