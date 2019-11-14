@@ -76,15 +76,19 @@ class AlbumPager(object):
 
 
 class Photo(object):
+    id = None
     url = None
     date = None
     title = None
     is_photo = True
+    background_position = None
 
-    def __init__(self, url, date, title):
-        self.url = url
+    def __init__(self, obj, date, title):
+        self.id = obj.id
+        self.url = obj.url
         self.date = date
         self.title = title
+        self.background_position = obj.background_position or 'center center'
 
 class Album(object):
 

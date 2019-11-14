@@ -149,6 +149,7 @@ class BabyHistoryAttachment(models.Model):
     history = models.ForeignKey(BabyHistory, on_delete=CASCADE)
     attachment_type = models.CharField(max_length=50)
     url = models.URLField(verbose_name=u'Путь')
+    background_position = models.CharField(max_length=200, verbose_name='Позиция фото', null=True, blank=True)
 
     class Meta:
         verbose_name = 'Вложение'

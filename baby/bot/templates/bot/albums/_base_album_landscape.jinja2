@@ -2,7 +2,7 @@
 {# Рисуем Фото #}
 
 {% macro render_photo(element) %}
-    <div class="photo-wrap {{ element.css_class_pos }}" style="background-image:url('{{ element.object.url }}'); background-size: cover; background-position: center center;"></div>
+    <div class="photo-wrap {{ element.css_class_pos }}" {% if not view.user.is_anonymous %}title="Нажмите для редактирования" {% endif %} data-id="{{ element.object.id }}" url="{{ element.object.url }}" style="background-image:url('{{ element.object.url }}'); background-size: cover; background-position: {{ element.object.background_position }};"></div>
     {% if element.object.date or element.object.title %}
         <div class="title {{ element.css_class_pos }}">
             <div>{{ element.object.date|date(('j E Y')) }}</div>
@@ -53,6 +53,21 @@
     <link rel="stylesheet" href="/static/css/landscape.css">
     <link href="https://fonts.googleapis.com/css?family=Caveat|Neucha|Comfortaa&display=swap" rel="stylesheet">
     <link href="/static/icons/css/iconpack_01.css" rel="stylesheet" />
+    <script src="/static/js/jquery_3.4.1.js"></script>
+
+    {% if not view.user.is_anonymous %}
+        <!-- jQuery Modal -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
+        <script src="/static/js/photo-edit.js"></script>
+        <style>
+            .modal{
+                max-width: 650px; text-align: center;
+                font-family: Comfortaa;
+            }
+        </style>
+    {% endif %}
+
     {% block css %}{% endblock %}
     {% endblock %}
 </head>
@@ -69,6 +84,13 @@
             </div>
             <div class="item"><a href="{{ url('logout') }}">выход</a></div>
         </div>
+
+        <div id="photo-edit-modal" class="modal">
+          <p>Выберите самый удачный вариант фото для альбома.</p>
+            <div id="photo-edit-modal-list"></div>
+            <a href="#" rel="modal:close" style="color: #000; margin: 15px; display: inline-block">Отмена</a>
+        </div>
+
     {% endif %}
     {% block select_album %}
     <div class="select-album-block" >

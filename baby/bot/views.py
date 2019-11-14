@@ -9,10 +9,10 @@ import hashids
 import pytz
 from django.contrib import auth
 from django.contrib.auth.models import User
-from django.http import HttpResponseNotFound, HttpResponseRedirect
+from django.http import HttpResponseNotFound, HttpResponseRedirect, JsonResponse
 from django.urls import resolve, reverse
 from django.utils.functional import cached_property
-from django.views.generic import TemplateView, DetailView
+from django.views.generic import TemplateView, DetailView, UpdateView
 
 from baby.settings import CURRENT_HOST
 from bot.base import BaseLine, DEFAULT_KEYBOARD, VK_APP_ID
@@ -54,6 +54,27 @@ class VkAuth(IndexView):
                 self.auth_user(self.user_vk.user)
                 return HttpResponseRedirect(self.user_vk.album_url)
         return HttpResponseRedirect(reverse('index'))
+
+
+class AlbumPhotoEdit(UpdateView):
+    pk_url_kwarg = 'photo_id'
+
+    def get_queryset(self):
+        user_vk = UserVK.objects.filter(user=self.request.user).first()
+        if user_vk or self.request.user.is_staff:
+            return BabyHistoryAttachment.objects.filter(history__user_vk=user_vk)
+        return BabyHistoryAttachment.objects.none()
+
+    @cached_property
+    def background_position(self):
+        return self.request.POST.get('background_position', 'center center')
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        self.object.background_position = self.background_position
+        self.object.save()
+        return JsonResponse(dict(success=True))
+
 
 class Welcome(BaseLine):
     """ Первое приветственное сообщение и перенаправление на настройки|код ребёнка """
@@ -747,7 +768,7 @@ class BabyHistoryMix(object):
         messages = self.message_qs(baby)
         photo_dict = defaultdict(list)
         for photo in self.photo_qs(baby):
-            photo_dict[photo.history_id].append(photo.url)
+            photo_dict[photo.history_id].append(photo)
 
         # Измерения
 
