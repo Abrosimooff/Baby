@@ -74,7 +74,7 @@
 <body>
 {% if baby %}
     {% if not view.user.is_anonymous %}
-        <div class="user-panel">
+        <div class="user-panel no-print">
             <div class="item"><span class="icon-vk" style="color: #4a76a8; margin-right: 10px; font-size: 16px;"></span>
                 {% if view.user.first_name and view.user.last_name %}
                     {{ view.user.first_name }} {{ view.user.last_name }}
