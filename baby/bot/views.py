@@ -32,8 +32,18 @@ def logout(request):
 class IndexView(TemplateView):
     template_name = 'bot/index.jinja2'
 
+    @cached_property
+    def user(self):
+        return self.request.user
+
+    @cached_property
+    def user_vk(self):
+        if not self.user.is_anonymous:
+            return UserVK.objects.filter(user=self.user).first()
+
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
+        ctx['view'] = self
         ctx['VK_APP_ID'] = VK_APP_ID
         return ctx
 

@@ -6,43 +6,130 @@
     <link rel="stylesheet" href="/static/css/base.css">
     <link href="https://fonts.googleapis.com/css?family=Caveat|Neucha|Comfortaa&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.2/animate.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
+    <link href="/static/icons/css/iconpack_01.css" rel="stylesheet" />
 
     <script type="text/javascript" src="https://vk.com/js/api/openapi.js?162"></script>
     <script type="text/javascript">VK.init({apiId: {{ VK_APP_ID }} });</script>
+    <script src="/static/js/jquery_3.4.1.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
 
     <style>
         body{
             background-image: url("/static/img/index_bg.jpg");
-            background-size: cover;
+            {#background-size: cover;#}
+            margin: 0;
         }
         .vk_auth_wrapper{margin: 50px auto; width: 200px;}
         .font{font-family: 'Caveat'}
+        .Comfortaa{font-family: Comfortaa}
         .btn{
             transition: background-color 0.5s;
             text-align: center; display: inline-block;
             background-color: #8acef5; color: #e4eff3;
-            font-family: 'Caveat'; border-radius: 3px;
-            font-size: 40px;
-            padding: 10px 30px; cursor: pointer; text-decoration: none
+            font-family: 'Comfortaa'; border-radius: 30px;
+            font-size: 26px;
+            padding: 20px 30px; cursor: pointer; text-decoration: none; margin: 20px;
         }
         .btn:hover{background-color: #7bb7da;}
+        .about p{font-size: 18px; color: #595959; line-height: 30px;}
+        .features li{ margin: 30px; font-size: 18px; font-weight: bold;}
     </style>
 </head>
-<body style="overflow: hidden">
-<div class="bounceInDown animated">
-    <h1 class="color1 font" style="text-align: center; font-size: 70px; margin: 150px 0px 20px 0px">Первый Альбом Младенца</h1>
-    <h1 class="color1 font" style="text-align: center; font-size: 50px; margin: 0px 0px 50px 0px ">Да, поможет вам БОТ</h1>
-</div>
-    <div class="bounceInUp animated" style="text-align: center">
-        <a class="btn" target="_blank" href="https://vk.com/ibabybot">Подробнее</a>
-    </div>
+<body style="">
 
-    <!-- VK Widget -->
-    <div class="vk_auth_wrapper">
-        <div id="vk_auth"></div>
+
+    {% if not view.user.is_anonymous %}
+        <div class="user-panel">
+            <div class="item"><span class="icon-vk" style="color: #4a76a8; margin-right: 10px; font-size: 16px;"></span>
+                {% if view.user.first_name and view.user.last_name %}
+                    {{ view.user.first_name }} {{ view.user.last_name }}
+                {% else %}
+                    {{ view.user.username }}
+                {% endif %}
+            </div>
+            <div class="item"><a href="{{ url('logout') }}">выход</a></div>
+        </div>
+    {% endif %}
+
+
+    <div class="bounceInDown animated">
+        <h1 class="color1 font" style="text-align: center; font-size: 70px; margin: 150px 0px 20px 0px">Первый Альбом Младенца</h1>
+        <h1 class="color1 font" style="text-align: center; font-size: 50px; margin: 0px 0px 50px 0px ">Да, поможет вам БОТ</h1>
     </div>
-    <script type="text/javascript">
-      VK.Widgets.Auth("vk_auth", {"width":200, authUrl: "{{ url('vk_auth') }}"});
-    </script>
+    <div class="bounceInUp animated" style="text-align: center">
+        <a class="btn" target="_blank" href="https://vk.com/ibabybot">Перейти в группу</a>
+        {% if view.user.is_anonymous %}
+            <a class="btn" href="#login-form" rel="modal:open">Перейти в мой альбом</a>
+            <div id="login-form" class="modal">
+                <h4 style="text-align: center" class="Comfortaa">Чтобы перейти к своему альбому - </h4>
+                <h4 style="text-align: center" class="Comfortaa">авторизуйтесь через "Вконтакте"</h4>
+                <!-- VK Widget -->
+                <div class="vk_auth_wrapper">
+                    <div id="vk_auth"></div>
+                </div>
+
+                <script type="text/javascript">
+                  VK.Widgets.Auth("vk_auth", {"width":200, authUrl: "{{ url('vk_auth') }}"});
+                </script>
+            </div>
+        {% elif view.user_vk %}
+            <a class="btn" href="{{ view.user_vk.album_url }}">Перейти в мой альбом</a>
+        {% endif %}
+    </div>
+    <div style="background-color: rgba(255,255,255,0.7); padding: 20px; margin-top: 120px; border-top: 5px solid #fff">
+        <div class="about Comfortaa" style="max-width: 900px; margin: 0 auto; color: #3da6e2;">
+
+            <h1 style="text-align: center; margin: 50px">Альбом младенца в live-режиме</h1>
+            <p>У вас родился малыш или малышка?</p>
+            <p>Давайте с первых дней создавать красивый альбом младенца не выходя из соц. сети <b>Вконтакте</b>, а наш Бот поможет вам в этом.</p>
+            <br>
+            <h3>Всё очень просто!</h3>
+            <p>По мере роста малыша просто присылаете боту фотографии, пишите сообщения, рассказываете о новых эмоциях, реакциях, умениях, интересах ребёнка.</p>
+            <p>В общем, описываете всё, что хотите увидеть в будущем альбоме вашего ребёнка.</p>
+            <br>
+            <p>Бот привяжет каждое сообщения к определённому возрасту ребёнка, и подготовит для вас красивый
+                детский альбом с хроникой фотографий и историй, который можно будет распечатать 😊</p>
+            <br>
+            <p>Вы сами решаете как часто заполнять альбом.</p>
+            <p>Но имейте ввиду, при загрузке 5 фото в неделю — через год получите альбом размером примерно 60 страниц, в котором будет около 250 записей. Это идеальный вариант для первого альбома вашего малыша :)</p>
+
+            <h1 style="text-align: center; margin: 50px">Как начать?</h1>
+
+
+            <div style="text-align: center">
+                <p>Переходим в группу Вконтакте  <a style="color: #3da6e2;" target="_blank" href="https://vk.com/ibabybot">Альбом Младенца. Бот</a></p>
+                <p>Нажимаем <b>"Написать сообщение"</b></p>
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/hz28-i_Q7DA?controls=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+
+            <h1 style="text-align: center; margin: 50px">Что умеет Бот?</h1>
+            <ul class="features">
+                 <li>Запоминает пол/имя/дата рождения ребёнка</li>
+                 <li>Принимает фотки и сообщения</li>
+                 <li>Умеет принимать показания роста и веса</li>
+                 <li>Может дать заполнить прошедшие месяца</li>
+                 <li>Можно вести один альбом нескольким пользователям</li>
+                 <li>Абсолютно ненавязчивая рассылка-напоминалка раз в месяц.</li>
+                 <li>Умеет собирать все записи в готовый альбом по разным шаблонам.</li>
+            </ul>
+
+            <h1 style="text-align: center; margin: 50px">Например</h1>
+
+            <div class="album" style="text-align: center">
+                <img style="width: 400px; margin: 20px;" src="https://sun9-38.userapi.com/c851020/v851020437/1edbca/Yqu3mQgvt3o.jpg">
+                <img style="width: 400px; margin: 20px;" src="https://sun9-34.userapi.com/c851020/v851020437/1edbc1/YoGNuEir3sM.jpg">
+
+                <img style="width: 400px; margin: 20px;" src="https://sun9-51.userapi.com/c855132/v855132246/11a1fc/lA-ZggwkAJs.jpg">
+                <img style="width: 400px; margin: 20px;" src="https://sun9-29.userapi.com/c855132/v855132246/11a205/7G46ackkIC4.jpg">
+
+                <img style="width: 400px; margin: 20px;" src="https://sun9-33.userapi.com/c853620/v853620263/10f54a/2yCvCokvBwY.jpg">
+                <img style="width: 400px; margin: 20px;" src="https://sun9-49.userapi.com/c851016/v851016263/1d1827/M2FZCSpkGKM.jpg">
+
+                <img style="width: 400px; margin: 20px;" src="https://sun9-25.userapi.com/c853620/v853620263/10f536/Gw0K0VYQIAY.jpg">
+                <img style="width: 400px; margin: 20px;" src="https://sun9-20.userapi.com/c851016/v851016263/1d1831/Fx9vsMorEHc.jpg">
+            </div>
+        </div>
+    </div>
 </body>
 </html>
