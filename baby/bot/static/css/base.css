@@ -55,5 +55,5 @@
 .user-panel .item{ display: inline-block; font-size: 14px; font-family: Comfortaa; padding: 20px;}
 .user-panel .item a{ color: inherit; text-decoration: none}
 .photo-wrap{cursor: pointer;}
-#photo-edit-modal-list .photo-wrap{height: 4cm; width: 4cm; display: inline-block; margin: 10px; cursor: pointer}
+#photo-edit-modal-list .photo-wrap{height: 4.5cm; width: 4.5cm; display: inline-block; margin: 5px; cursor: pointer}
 #photo-edit-modal-list .photo-wrap:hover{opacity: 0.8;}

@@ -24,12 +24,14 @@ $(function () {
         var url = $(this).attr('url');
         var data_id = $(this).attr('data-id');
         var items =
-                   '<div class="photo-wrap photo-edit" data-id="'+data_id+'" style="background-image:url('+url+'); background-size: cover; background-position: left center;"></div>' +
-                   '<div class="photo-wrap photo-edit" data-id="'+data_id+'" style="background-image:url('+url+'); background-size: cover; background-position: center center;"></div>'+
-                   '<div class="photo-wrap photo-edit" data-id="'+data_id+'" style="background-image:url('+url+'); background-size: cover; background-position: right center;"></div>'+
                    '<div class="photo-wrap photo-edit" data-id="'+data_id+'" style="background-image:url('+url+'); background-size: cover; background-position: left top;"></div>' +
                    '<div class="photo-wrap photo-edit" data-id="'+data_id+'" style="background-image:url('+url+'); background-size: cover; background-position: center top;"></div>'+
                    '<div class="photo-wrap photo-edit" data-id="'+data_id+'" style="background-image:url('+url+'); background-size: cover; background-position: right top;"></div>'+
+
+                   '<div class="photo-wrap photo-edit" data-id="'+data_id+'" style="background-image:url('+url+'); background-size: cover; background-position: left center;"></div>' +
+                   '<div class="photo-wrap photo-edit" data-id="'+data_id+'" style="background-image:url('+url+'); background-size: cover; background-position: center center;"></div>'+
+                   '<div class="photo-wrap photo-edit" data-id="'+data_id+'" style="background-image:url('+url+'); background-size: cover; background-position: right center;"></div>'+
+
                    '<div class="photo-wrap photo-edit" data-id="'+data_id+'" style="background-image:url('+url+'); background-size: cover; background-position: left bottom;"></div>' +
                    '<div class="photo-wrap photo-edit" data-id="'+data_id+'" style="background-image:url('+url+'); background-size: cover; background-position: center bottom;"></div>'+
                    '<div class="photo-wrap photo-edit" data-id="'+data_id+'" style="background-image:url('+url+'); background-size: cover; background-position: right bottom;"></div>'
