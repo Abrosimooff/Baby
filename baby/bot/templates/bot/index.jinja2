@@ -83,6 +83,9 @@
         {% elif view.user_vk %}
             <a class="btn" href="{{ view.user_vk.album_url }}">Перейти в мой альбом</a>
         {% endif %}
+        {% if 'fail' in view.request.GET %}
+            <p class="Comfortaa" style="color: #84291c">К сожалению, мы не смогли найти ваш альбом 😮</p>
+        {% endif %}
     </div>
     <div style="background-color: rgba(255,255,255,0.7); padding: 20px; margin-top: 120px; border-top: 5px solid #fff">
         <div class="about Comfortaa" style="max-width: 900px; margin: 0 auto; color: #3da6e2;">

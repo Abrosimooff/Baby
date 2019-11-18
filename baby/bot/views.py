@@ -63,7 +63,7 @@ class VkAuth(IndexView):
             if self.user_vk and self.user_vk.user:
                 self.auth_user(self.user_vk.user)
                 return HttpResponseRedirect(self.user_vk.album_url)
-        return HttpResponseRedirect(reverse('index'))
+        return HttpResponseRedirect(reverse('index')+'?fail')
 
 
 class AlbumPhotoEdit(UpdateView):
