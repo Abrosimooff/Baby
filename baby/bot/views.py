@@ -74,7 +74,7 @@ class AlbumPhotoEdit(UpdateView):
             return BabyHistoryAttachment.objects.all()
         user_vk = UserVK.objects.filter(user=self.request.user).first()
         if user_vk:
-            return BabyHistoryAttachment.objects.filter(history__user_vk=user_vk)
+            return BabyHistoryAttachment.objects.filter(history__baby=user_vk.baby)
         return BabyHistoryAttachment.objects.none()
 
     @cached_property
@@ -841,6 +841,7 @@ class AlbumPrint(BabyHistoryMix, DetailView):
         ctx['baby'] = self.object
         ctx['view'] = self
         ctx['baby_history'] = self.baby_history(self.object)
+        ctx['VK_APP_ID'] = VK_APP_ID
         # ctx['height_chart'] = self.measure_chart(BabyHeight, 'height', self.object)
         # ctx['weight_chart'] = self.measure_chart(BabyWeight, 'weight', self.object)
         return ctx
@@ -868,6 +869,11 @@ class AlbumPrintSecret(AlbumPrint):
     @cached_property
     def user(self):
         return self.request.user
+
+    @cached_property
+    def is_my_album(self):
+        """ Принадлежит ли альбом человеку, котоырй тут авторизован """
+        return self.user_vk and self.user_vk.user == self.user
 
     @cached_property
     def user_vk(self):

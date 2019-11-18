@@ -53,19 +53,26 @@
     <link rel="stylesheet" href="/static/css/landscape.css">
     <link href="https://fonts.googleapis.com/css?family=Caveat|Neucha|Comfortaa&display=swap" rel="stylesheet">
     <link href="/static/icons/css/iconpack_01.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
     <script src="/static/js/jquery_3.4.1.js"></script>
+    <!-- jQuery Modal -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
 
-    {% if not view.user.is_anonymous %}
-        <!-- jQuery Modal -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
+    <style>
+        #photo-edit-modal{
+            max-width: 650px;
+        }
+        .modal{
+            text-align: center;
+            font-family: Comfortaa;
+            text-align: center;
+        }
+        .vk_auth_wrapper{margin: 50px auto; width: 200px;}
+        .Comfortaa{font-family: Comfortaa}
+    </style>
+
+    {% if view.is_my_album or view.user.is_staff %}
         <script src="/static/js/photo-edit.js"></script>
-        <style>
-            .modal{
-                max-width: 650px; text-align: center;
-                font-family: Comfortaa;
-            }
-        </style>
     {% endif %}
 
     {% block css %}{% endblock %}
@@ -73,7 +80,27 @@
 </head>
 <body>
 {% if baby %}
-    {% if not view.user.is_anonymous %}
+    {% if view.user.is_anonymous %}
+        <div class="no-print" style="padding: 15px 50px;margin-bottom: 50px;  text-align: right; border-bottom: #cbcbcb 1px solid">
+            <p style="margin: 0"><span style="line-height: 50px; color: #9d9d9d; font-family: Comfortaa; margin-right: 20px;">Чтобы редактировать альбом - вам нужно</span>
+                <a href="#login-form" style="text-decoration: none" rel="modal:open" class="print-btn">Авторизоваться</a></p>
+
+            <div id="login-form" class="modal">
+                <h4 style="text-align: center" class="Comfortaa">Чтобы редактировать ваш альбом - </h4>
+                <h4 style="text-align: center" class="Comfortaa">авторизуйтесь через "Вконтакте"</h4>
+                <!-- VK Widget -->
+                <div class="vk_auth_wrapper">
+                    <div id="vk_auth"></div>
+                </div>
+
+                <script type="text/javascript" src="https://vk.com/js/api/openapi.js?162"></script>
+                <script type="text/javascript">VK.init({apiId: {{ VK_APP_ID }} });</script>
+                <script type="text/javascript">
+                  VK.Widgets.Auth("vk_auth", {"width":200, authUrl: "{{ url('vk_auth') }}"});
+                </script>
+            </div>
+        </div>
+    {% else %}
         <div class="user-panel no-print">
             <div class="item"><span class="icon-vk" style="color: #4a76a8; margin-right: 10px; font-size: 16px;"></span>
                 {% if view.user.first_name and view.user.last_name %}
@@ -90,8 +117,8 @@
             <div id="photo-edit-modal-list"></div>
             <a href="#" rel="modal:close" style="color: #000; margin: 15px; display: inline-block">Отмена</a>
         </div>
-
     {% endif %}
+
     {% block select_album %}
     <div class="select-album-block" >
         <h2 style="color: #9d9d9d; font-family: Comfortaa">Выбери свой альбом</h2>
