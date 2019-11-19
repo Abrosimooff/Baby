@@ -16,9 +16,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from bot.urls import urlpatterns as bot_urls
+from web.urls import urlpatterns as web_urls
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-] + bot_urls
+    path('admin/', admin.site.urls)]\
+      + bot_urls \
+      + web_urls
 
 

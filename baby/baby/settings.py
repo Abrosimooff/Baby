@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'bot'
+    'bot',
+    'web',
 ]
 
 MIDDLEWARE = [
@@ -61,8 +62,8 @@ ROOT_URLCONF = 'baby.urls'
 TEMPLATES = [
     {
         # 'BACKEND': 'django.template.backends.jinja2.Jinja2',
-        'BACKEND': 'bot.utils.jinja2.CustomJinja2',
-        'DIRS': [os.path.join(BASE_DIR, 'bot', 'templates')],
+        'BACKEND': 'web.utils.jinja2.CustomJinja2',
+        'DIRS': [os.path.join(BASE_DIR, 'web', 'templates')],
         'APP_DIRS': True,
     },
     {
@@ -124,4 +125,4 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'bot', 'static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'web', 'static')

@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from bot.models import Baby
-from bot.views import BabyHistoryMix
+from web.views import BabyHistoryMix
 
 
 class Command(BaseCommand):
