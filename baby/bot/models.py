@@ -13,7 +13,7 @@ from baby.settings import CURRENT_HOST
 from bot.models_utils.jsonfield import JSONField
 from bot.helpers import DateUtil
 
-ALBUM_COUNT = 4
+ALBUM_COUNT = 6
 ALBUM_IDS = range(1, ALBUM_COUNT + 1)
 
 

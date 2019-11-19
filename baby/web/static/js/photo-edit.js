@@ -17,9 +17,6 @@ function getCookie(name) {
 
 $(function () {
     // открыть модалку редактирования фото
-    console.log($('.photo-wrap'))
-    $('.photo-wrap').append('<span class="photo-wrap-open-edit icon-pencil-1"></span>');
-
     $('.photo-wrap').click(function () {
         var url = $(this).attr('url');
         var data_id = $(this).attr('data-id');

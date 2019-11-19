@@ -1,0 +1,104 @@
+{% extends 'web/albums/_base_album_landscape.jinja2' %}
+
+{% block css %}
+    <style>
+        .page{
+            background-image: url("/static/img/albums/6/bg.jpg");
+            background-position: center center;
+            background-size: cover;
+            outline: 0.5cm solid rgba(255, 255, 255, 0.6);
+            outline-offset: -0.5cm;
+        }
+        .page-num-center{
+            color:#fff; font-weight: bold; font-size: 0.6cm;text-shadow: 0px 0px 2px #333;
+        }
+        .photo-wrap{
+            overflow: hidden;
+            box-shadow: 7px 7px 15px #8a84c8;
+            border: 0.3cm solid #fff; border-bottom: 1.5cm solid #fff;
+        }
+        .text{
+            font-family: 'Comfortaa', cursive; font-size: 0.45cm; color: #000; line-height: 0.7cm;
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 0.5cm; border-radius: 0.5cm; max-width: 12cm;
+        }
+        .title{
+            font-family: 'Comfortaa', cursive; font-size: 0.35cm; color: #000;
+            width: 8cm;
+        }
+
+        .text.pos-left-bottom{border-radius: 0.5cm 0.5cm 0.5cm 0cm}
+        .text.pos-left-top{border-radius: 0cm 0.5cm 0.5cm 0.5cm}
+        .text.pos-right-top{border-radius: 0.5cm 0cm 0.5cm 0.5cm}
+        .text.pos-right-bottom{border-radius: 0.5cm 0.5cm 0cm 0.5cm}
+
+
+        .text .date{font-size: 0.4cm; color: #8a84c8}
+
+        {#.text.pos-left-bottom .date{position: absolute; left: 0.5cm; bottom: -0.8cm; }#}
+        {#.text.pos-left-top .date{position: absolute; left: 0.5cm; top: -0.8cm; }#}
+        {#.text.pos-right-top .date{position: absolute; right: 0.5cm; top: -0.8cm; }#}
+        {#.text.pos-right-bottom .date{position: absolute; right: 0.5cm; bottom: -0.8cm; }#}
+
+
+        .title.pos-left-bottom{position: absolute; left: 2.8cm; top: 18.6cm; transform: rotate(-4deg);}
+        .title.pos-left-top{position: absolute; left: 2.2cm; top: 8.6cm; transform: rotate(4deg);}
+        .title.pos-right-top{position: absolute; right: 2.8cm; top: 8.6cm; transform: rotate(4deg);}
+        .title.pos-right-bottom{position: absolute; right: 2.2cm; top: 18.6cm; transform: rotate(-6deg);}
+
+        .photo-wrap.pos-left-bottom{transform: rotate(-4deg);}
+        .photo-wrap.pos-left-top{transform: rotate(4deg);}
+        .photo-wrap.pos-right-top{transform: rotate(4deg);}
+        .photo-wrap.pos-right-bottom{transform: rotate(-6deg);}
+
+        {#.photo-wrap.pos-left-bottom, .weight.pos-left-bottom, .height.pos-left-bottom{border-bottom-left-radius: 0cm;}#}
+        {#.photo-wrap.pos-left-top, .weight.pos-left-top, .height.pos-left-top{border-top-left-radius: 0cm;}#}
+        {#.photo-wrap.pos-right-top, .weight.pos-right-top, .height.pos-right-top{border-top-right-radius: 0cm;}#}
+        {#.photo-wrap.pos-right-bottom, .weight.pos-right-bottom, .height.pos-right-bottom{border-bottom-right-radius: 0cm;}#}
+
+        .text p{margin: 0px;}
+        .month{
+            font-family: 'Comfortaa', cursive; font-size: 3cm; letter-spacing: 0.2cm;
+            text-align: center; padding-top: 5.5cm; transform: rotate(-5deg);
+        }
+        .month b{ background-color: #fff; padding: 0.5cm 0.5cm 0.5cm 1cm; box-shadow: -5px 0px 10px #424242; border-left: 2cm double #8a84c8;}
+
+        .women .month, .women .height .height-icon, .women .weight .weight-icon, .women .color{color: #8a84c8}
+        .men .month, .men .height .height-icon, .men .weight .weight-icon{color: #8a84c8}
+        .men .color{color: #fff}
+        {#.men .home.subpage{border: 1cm solid #b1cbdc}#}
+        .men .first_name{color: #8a84c8}
+        .men .month b {color: #8a84c8}
+
+        {#.women .home.subpage{border: 1cm solid #fff}#}
+
+        .women .first_name{color: #8a84c8}
+        .women .month b {color: #8a84c8}
+
+
+        .height, .weight{background-color: rgba(255, 255, 255, 0.85); padding: 0.6cm; border-radius: 0.3cm; font-family: 'Comfortaa'}
+        .height .height-value, .weight .weight-value{font-size: 1cm}
+        .height .height-date, .weight .weight-date{font-size: 0.5cm}
+
+        {#.caveat{font-family: 'Caveat', cursive;}#}
+        {#.neucha{font-family: 'Neucha', cursive;}#}
+        .font{font-family: 'Comfortaa';}
+
+        .home.subpage{
+            margin: 1cm; padding: 1cm;
+            height: 149mm;
+            {#border-radius: 2cm;#}
+            {#box-shadow: 0px 0px 10px #c7c7c7;#}
+            {#outline: 0.5cm solid #fff;#}
+            {#outline-offset: -0.5cm;#}
+        }
+        .home.subpage .data{
+            transform: rotate(-5deg);
+            padding: 1.2cm;
+            border-left: 2cm double #8a84c8;
+            background-color: rgba(255, 255, 255, 0.95);
+            width: 100%; height: 100%; text-align: center;
+        }
+
+    </style>
+{% endblock %}

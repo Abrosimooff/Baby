@@ -121,7 +121,7 @@
     {% endif %}
 
     {% block select_album %}
-    <div class="select-album-block" >
+    <div class="select-album-block no-print">
         <h2 style="color: #9d9d9d; font-family: Comfortaa">Выбери свой альбом</h2>
         {% for album_data in view.album_list %}
             <a class="select-album {% if album_data.pk == view.album_pk %}current{% endif %}" href="?album={{ album_data.pk }}" style="background-size: cover; background-image: url('{{ album_data.background_url }}')">

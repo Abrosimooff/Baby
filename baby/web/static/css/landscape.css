@@ -108,7 +108,7 @@ body {
         width: 297mm;
         height: 210mm;
     }
-    .select-album-block, .no-print{display: none!important;}
+    .no-print{display: none!important;}
     .page {
         margin: 0;
         border: initial;

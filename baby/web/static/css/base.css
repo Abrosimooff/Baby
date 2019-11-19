@@ -12,7 +12,7 @@
 .color1{color: #8acef5}
 .color2{color: #e4eff3}
 
-.select-album-block{ display: block; text-align: center;}
+.select-album-block{ display: block; text-align: center; width: 900px; margin: 0 auto}
 
 .select-album{
     display: inline-block; margin: 20px; width: 250px; height: 150px; border-radius: 10px; text-decoration: none;
