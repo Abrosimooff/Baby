@@ -22,13 +22,8 @@ from bot.base_utils.keyboards import DEFAULT_KEYBOARD
 from bot.helpers import DateUtil
 from bot.messages import MONTH_MESSAGES
 from bot.models import AttachType, Baby, BabyHistory, UserVK
+from baby.settings import VK_KEY, VK_GROUP_ID, VK_SECRET_KEY, VICTOR_USER, VK_APP_ID
 
-VK_KEY = '2a41e2391b546114ebaf498df8b9fbf46d2fc8aae209200d038f80ca133f19f214b701d55befe7dbd9e6d'
-
-VK_GROUP_ID = 186300624
-VK_SECRET_KEY = '08a48e9e691f4700b70ae37d09ddcbe7'
-VICTOR_USER = 198163426
-VK_APP_ID = 7193330
 
 # Процесс работы:
 # 1. Команда vk_bot
